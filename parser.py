@@ -1,3 +1,5 @@
+BINARY_OPERATORS = {"EQUAL", "NOT_EQUAL", "GT", "LT", "GT_EQUAL", "LT_EQUAL", "PLUS", "MINUS", "MULTIPLY", "DIVIDE", "POWER"}
+
 class Parser:
     def __init__(self, tokens):
         self.tokens = tokens
@@ -7,6 +9,7 @@ class Parser:
 
         self.index = 0
         self.current_token = self.tokens[self.index]
+        
     def advance(self):
         self.index+=1
         if self.index >= len(self.tokens):
@@ -47,10 +50,10 @@ class Parser:
         elif self.current_token.type == "IDENT":
             return self.parse_expression()
         else:
-            raise Exception(f"my guy.. never seen '{self.current_token.type}' in my life btw")
+            raise Exception(f"my guy.. never seen '{self.current_token.value}' in my life btw")
 
     def parse_var_declaration(self):
-        constant = self.current_token.type == "CONST" # is constant? if yes, return true - else, false
+        constant = self.current_token.type == "CONST" #
         self.advance()
         name = self.current_token.value
         self.advance()
@@ -58,7 +61,7 @@ class Parser:
         value = self.parse_expression() 
         return VarDeclaration(name, value, constant)
     
-    def parse_expression(self):
+    def parse_primary(self):
         if self.current_token.type == "NUMBER":
             node = NumberLiteral(self.current_token.value)
             self.advance()
@@ -87,6 +90,11 @@ class Parser:
             if self.current_token.type is not None and self.current_token.type == "LPAREN":
                 args = self.parse_call_args()
                 return CallExpression(name, args)
+        elif self.current_token.type == "LPAREN":  
+            self.advance()
+            node = self.parse_expression()
+            self.advance()
+            return node
         else:
             raise Exception(f"i dont know how you expect me to parse expression {self.current_token.value}")
     
@@ -96,9 +104,20 @@ class Parser:
         while self.current_token.type is not None and self.current_token.type != "RPAREN":
             if self.current_token.type == "COMMA":
                 self.advance()
-            args.append(self.parse_expression())
+            args.append(self.parse_primary())
         self.advance()
         return args
+
+    def parse_expression(self):
+        left = self.parse_primary()
+
+        while self.current_token is not None and self.current_token.type in BINARY_OPERATORS:
+            operator = self.current_token.value
+            self.advance()
+            right = self.parse_primary()
+            left = BinaryExpression(left, operator, right)
+        
+        return left
 
 
 class VarDeclaration:
@@ -186,7 +205,7 @@ class Program:
 if __name__ == "__main__":
     from lexer import Lexer
     
-    lexer = Lexer('yap("whats up pookie bear")')
+    lexer = Lexer("vibe x = ((5 + 3)**2)*2")
     tokens = lexer.tokenize()
     
     parser = Parser(tokens)
