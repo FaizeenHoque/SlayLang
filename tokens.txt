@@ -1,0 +1,119 @@
+# ============================================
+#   SLAYLANG — OFFICIAL TOKEN SPEC v1.0
+#   ur language. u built this. fr.
+# ============================================
+
+# --- literals ---
+STRING        → "hello bestie"       # text in quotes
+NUMBER        → 42, 3.14             # ints and floats
+BOOL          → facts / cap          # true / false
+NULL          → ghosted              # null / none
+
+# --- variables ---
+LET           → vibe                 # declare variable
+CONST         → lock                 # constant (cannot change)
+
+# examples:
+# vibe name = "faizeen"
+# lock PI = 3.14
+
+# --- control flow ---
+IF            → sus                  # if
+ELSE_IF       → mid                  # else if
+ELSE          → tho                  # else
+
+# example:
+# sus (score > 10):
+#     yap("ur valid")
+# mid (score == 5):
+#     yap("meh")
+# tho:
+#     yap("not today")
+
+# --- loops ---
+WHILE         → grind                # while loop
+FOR           → spin                 # classic for loop
+FOR_OF        → roam                 # iterate over collection
+BREAK         → dip                  # break out of loop
+CONTINUE      → skip                 # skip to next iteration
+
+# examples:
+# grind (lives > 0): ...
+# spin (vibe i = 0; i < 5; i++): ...
+# roam (item in list): ...
+
+# --- functions ---
+FUNCTION      → cook                 # define a function
+RETURN        → yeet                 # return a value
+ARROW         → =>                   # arrow function
+
+# examples:
+# cook greet(name): ...
+# vibe add = (a, b) => a + b
+
+# --- logic ---
+AND           → &&
+OR            → ||
+NOT           → nah                  # logical NOT
+
+# --- math operators ---
+PLUS          → +
+MINUS         → -
+MULTIPLY      → *
+DIVIDE        → /
+MODULO        → %
+POWER         → **
+
+# --- assignment ---
+ASSIGN        → =
+ADD_ASSIGN    → +=
+SUB_ASSIGN    → -=
+MUL_ASSIGN    → *=
+DIV_ASSIGN    → /=
+
+# --- comparison ---
+EQUAL         → ==
+NOT_EQUAL     → !=
+GT            → >
+LT            → 
+GT_EQUAL      → >=
+LT_EQUAL      → <=
+
+# --- punctuation ---
+LPAREN        → (
+RPAREN        → )
+LBRACKET      → [
+RBRACKET      → ]
+LBRACE        → {
+RBRACE        → }
+COMMA         → ,
+COLON         → :
+DOT           → .
+
+# --- output / input ---
+PRINT         → yap                  # basic print
+PRINT_LOUD    → spill                # print with !!! (loud mode)
+INPUT         → interrogate          # ask user for input
+
+# --- imports ---
+IMPORT        → fw                   # import a module
+
+# --- error handling ---
+TRY           → no_shot              # try block
+CATCH         → ratio                # catch block
+THROW         → flop                 # throw an error
+
+# --- special ---
+DELETE        → ghost                # delete a variable
+NEWLINE       → \n                   # line break
+EOF           → <end of file>        # signals lexer is done
+
+# ============================================
+# LEXER RULES (not tokens, but important)
+# ============================================
+# // starts a comment → skip everything until \n
+# " starts a string  → consume until closing "
+# digits start a number → consume until non-digit
+# letters start an IDENT → check against keyword list
+# unknown character  → "bestie... what is '{char}'? 💀"
+# ============================================
