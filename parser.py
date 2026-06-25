@@ -1,7 +1,31 @@
-BINARY_OPERATORS = {"EQUAL", "NOT_EQUAL", "GT", "LT", "GT_EQUAL", "LT_EQUAL", "PLUS", "MINUS", "MULTIPLY", "DIVIDE", "POWER"}
+from nodes import *
+from tokens import *
 
 class Parser:
+    """
+    Parses a flat list of tokens into an Abstract Syntax Tree (AST).
+
+    The parser uses recursive descent to handle operator precedence and
+    nested expressions. It consumes tokens produced by the Lexer and
+    builds a Program node whose children represent every top-level
+    statement in the source.
+
+    Attributes:
+        tokens (list): The full list of Token objects to parse.
+        index (int): The current position in the token list.
+        current_token (Token): The token at the current index.
+    """
+
     def __init__(self, tokens):
+        """
+        Initialize the Parser with a list of tokens.
+
+        Args:
+            tokens (list): A non-empty list of Token objects.
+
+        Raises:
+            Exception: If the token list is empty.
+        """
         self.tokens = tokens
         
         if self.tokens == []:
@@ -9,24 +33,48 @@ class Parser:
 
         self.index = 0
         self.current_token = self.tokens[self.index]
-        
+
     def advance(self):
-        self.index+=1
+        """
+        Move to the next token in the list.
+
+        Increments the index and updates current_token. If the end of
+        the token list is reached, current_token is set to None.
+        """
+        self.index += 1
         if self.index >= len(self.tokens):
             self.current_token = None
         else:
             self.current_token = self.tokens[self.index]
+
     def peek(self):
+        """
+        Look at the next token without consuming it.
+
+        Returns:
+            Token | None: The token immediately after the current one,
+            or None if the current token is the last in the list.
+        """
         if self.index + 1 >= len(self.tokens):
             return None
-        return self.tokens[self.index+1]
+        return self.tokens[self.index + 1]
 
     def parse(self):
+        """
+        Parse the entire token stream into a Program AST node.
+
+        Iterates over all tokens, skipping newlines and delegating each
+        non-trivial token to parse_statement(), until the EOF token is
+        reached.
+
+        Returns:
+            Program: The root AST node containing all top-level statements.
+        """
         statements = []
 
-        while self.current_token.type != "EOF":
+        while self.current_token.type != TokenType.EOF:
             # skip new lines
-            if self.current_token.type == "NEWLINE":
+            if self.current_token.type == TokenType.NEWLINE:
                 self.advance()
             else:
                 statement = self.parse_statement()
@@ -35,62 +83,82 @@ class Parser:
         return Program(statements)
     
     def parse_statement(self):
-        if self.current_token.type in ("LET", "CONST"):
+        """
+        Parse a single statement based on the current token type.
+
+        Dispatches to the appropriate sub-parser depending on what kind
+        of statement starts at the current token.
+
+        Returns:
+            ASTNode: One of VarDeclaration, IfStatement, WhileStatement,
+            FunctionDeclaration, ReturnStatement, or an expression node.
+
+        Raises:
+            Exception: If the current token does not begin a valid statement.
+        """
+        if self.current_token.type in (TokenType.LET, TokenType.CONST):
             return self.parse_var_declaration()
-        elif self.current_token.type == "IF":
+        elif self.current_token.type == TokenType.IF:
             return self.parse_if_statement()
-        elif self.current_token.type == "WHILE":
+        elif self.current_token.type == TokenType.WHILE:
             return self.parse_while_statement()
-        elif self.current_token.type == "FUNCTION":
+        elif self.current_token.type == TokenType.FUNCTION:
             return self.parse_function_declaration()
-        elif self.current_token.type == "RETURN":
+        elif self.current_token.type == TokenType.RETURN:
             return self.parse_return_statement()
-        elif self.current_token.type in ("PRINT", "PRINT_LOUD", "INPUT"):
+        elif self.current_token.type in INBUILT_FUNCTIONS:
             return self.parse_expression()
-        elif self.current_token.type == "IDENT":
+        elif self.current_token.type == TokenType.IDENT:
             return self.parse_expression()
         else:
             raise Exception(f"my guy.. never seen '{self.current_token.value}' in my life btw")
 
-    def parse_var_declaration(self):
-        constant = self.current_token.type == "CONST" #
-        self.advance()
-        name = self.current_token.value
-        self.advance()
-        self.advance() # skip ASSIGN
-        value = self.parse_expression() 
-        return VarDeclaration(name, value, constant)
-    
     def parse_primary(self):
-        if self.current_token.type == "NUMBER":
+        """
+        Parse a primary (atomic) expression.
+
+        Handles the smallest indivisible units of an expression:
+        number literals, string literals, boolean literals, identifiers
+        (which may be followed by a call argument list), built-in
+        function calls, and parenthesised sub-expressions.
+
+        Returns:
+            ASTNode: One of NumberLiteral, StringLiteral, BoolLiteral,
+            Identifier, or CallExpression; or the result of a recursive
+            parse_expression() call for parenthesised groups.
+
+        Raises:
+            Exception: If the current token cannot start a primary expression.
+        """
+        if self.current_token.type == TokenType.NUMBER:
             node = NumberLiteral(self.current_token.value)
             self.advance()
             return node
-        elif self.current_token.type == "STRING":
+        elif self.current_token.type == TokenType.STRING:
             node = StringLiteral(self.current_token.value)
             self.advance()
             return node
-        elif self.current_token.type in ("TRUE", "FALSE"):
+        elif self.current_token.type in BOOLEANS:
             node = BoolLiteral(self.current_token.value)
             self.advance()
             return node
-        elif self.current_token.type == "IDENT":
+        elif self.current_token.type == TokenType.IDENT:
             name = self.current_token.value
             self.advance()
 
-            if self.current_token.type is not None and self.current_token.type == "LPAREN":
+            if self.current_token.type is not None and self.current_token.type == TokenType.LPAREN:
                 args = self.parse_call_args()
                 return CallExpression(name, args)
             else:
                 return Identifier(name)
-        elif self.current_token.type in ("PRINT", "PRINT_LOUD", "INPUT"):
+        elif self.current_token.type in INBUILT_FUNCTIONS:
             name = self.current_token.value  
             self.advance()
             
-            if self.current_token.type is not None and self.current_token.type == "LPAREN":
+            if self.current_token.type is not None and self.current_token.type == TokenType.LPAREN:
                 args = self.parse_call_args()
                 return CallExpression(name, args)
-        elif self.current_token.type == "LPAREN":  
+        elif self.current_token.type == TokenType.LPAREN:  
             self.advance()
             node = self.parse_expression()
             self.advance()
@@ -98,17 +166,61 @@ class Parser:
         else:
             raise Exception(f"i dont know how you expect me to parse expression {self.current_token.value}")
     
-    def parse_call_args(self):
+    def parse_var_declaration(self):
+        """
+        Parse a variable declaration statement (let or const).
+
+        Expects the form:  <let|const> <identifier> = <expression>
+
+        Advances past the keyword, reads the variable name, skips the
+        assignment operator, then delegates to parse_expression() for
+        the initialiser value.
+
+        Returns:
+            VarDeclaration: AST node holding the variable name, its
+            initial value expression, and whether it is constant.
+        """
+        constant = self.current_token.type == TokenType.CONST
         self.advance()
+        name = self.current_token.value
+        self.advance()
+        self.advance()  # skip the '=' token
+        value = self.parse_expression() 
+        return VarDeclaration(name, value, constant)
+    
+    def parse_call_args(self):
+        """
+        Parse the argument list of a function call.
+
+        Expects the current token to be '(' on entry. Reads comma-
+        separated primary expressions until the matching ')' is found,
+        then advances past it.
+
+        Returns:
+            list[ASTNode]: A (possibly empty) list of argument nodes,
+            each produced by parse_primary().
+        """
+        self.advance()  # consume '('
         args = []
-        while self.current_token.type is not None and self.current_token.type != "RPAREN":
-            if self.current_token.type == "COMMA":
+        while self.current_token.type is not None and self.current_token.type != TokenType.RPAREN:
+            if self.current_token.type == TokenType.COMMA:
                 self.advance()
             args.append(self.parse_primary())
-        self.advance()
+        self.advance()  # consume ')'
         return args
 
     def parse_expression(self):
+        """
+        Parse a binary expression with left-to-right associativity.
+
+        Starts by parsing a primary expression as the left-hand operand,
+        then repeatedly consumes binary operators and right-hand primaries
+        to build a left-associative BinaryExpression tree.
+
+        Returns:
+            ASTNode: A single primary node if no binary operator follows,
+            or a (possibly nested) BinaryExpression node otherwise.
+        """
         left = self.parse_primary()
 
         while self.current_token is not None and self.current_token.type in BINARY_OPERATORS:
@@ -119,88 +231,6 @@ class Parser:
         
         return left
 
-
-class VarDeclaration:
-    def __init__(self, name, value, constant):
-        self.name = name
-        self.value = value
-        self.constant = constant
-    def __repr__(self):
-        return f"VarDeclaration(name={self.name}, value={self.value}, constant={self.constant})"
-
-class NumberLiteral:
-    def __init__(self, value):
-        self.value = value
-    def __repr__(self):
-        return f"NumberLiteral(value={self.value})"
-
-class StringLiteral:
-    def __init__(self, value):
-        self.value = value
-    def __repr__(self):
-        return f"StringLiteral(value={self.value})"
-
-class BoolLiteral:
-    def __init__(self, value):
-        self.value = value
-    def __repr__(self):
-        return f"BoolLiteral(value={self.value})"
-
-class Identifier:
-    def __init__(self, name):
-        self.name = name
-    def __repr__(self):
-        return f"Identifier(name={self.name})"
-
-class BinaryExpression:
-    def __init__(self, left, operator, right):
-        self.left = left
-        self.operator = operator
-        self.right = right
-    def __repr__(self):
-        return f"BinaryExpression(left={self.left}, operator={self.operator}, right={self.right})"
-
-class CallExpression:
-    def __init__(self, name, args):
-        self.name = name
-        self.args = args
-    def __repr__(self):
-        return f"CallExpression(name={self.name}, args={self.args})"
-
-class ReturnStatement:
-    def __init__(self, value):
-        self.value = value
-    def __repr__(self):
-        return f"ReturnStatement(value={self.value})"
-
-class IfStatement:
-    def __init__(self, condition, body, else_body):
-        self.condition = condition
-        self.body = body
-        self.else_body = else_body
-    def __repr__(self):
-        return f"IfStatement(condition={self.condition}, body={self.body}, else_body={self.else_body})"
-
-class WhileStatement:
-    def __init__(self, condition, body):
-        self.condition = condition
-        self.body = body
-    def __repr__(self):
-        return f"WhileStatement(condition={self.condition}, body={self.body})"
-
-class FunctionDeclaration:
-    def __init__(self, name, params, body):
-        self.name = name
-        self.params = params
-        self.body = body
-    def __repr__(self):
-        return f"FunctionDeclaration(name={self.name}, params={self.params}, body={self.body})"
-
-class Program:
-    def __init__(self, statements):
-        self.statements = statements
-    def __repr__(self):
-        return f"Program(statements={self.statements})"
 
 if __name__ == "__main__":
     from lexer import Lexer
