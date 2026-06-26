@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-# ask for version
 read -p "change version to: " VERSION
 
 echo "→ updating versions..."
@@ -10,23 +9,29 @@ echo "→ updating versions..."
 sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" interpreter/package.json
 sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" vscode_ext/package.json
 
-# update vsix filename reference in postinstall.js
-sed -i "s/slay-lang-.*\.vsix/slay-lang-$VERSION.vsix/" interpreter/postinstall.js
 
 echo "→ packaging VS Code extension..."
+
 cd vscode_ext
 vsce package --out slay-lang-$VERSION.vsix
 cd ..
 
+
 echo "→ copying vsix to interpreter..."
+
 cp vscode_ext/slay-lang-$VERSION.vsix interpreter/slay-lang-$VERSION.vsix
 
-# remove old vsix files from interpreter
+
+echo "→ removing old vsix files..."
+
 find interpreter -name "slay-lang-*.vsix" ! -name "slay-lang-$VERSION.vsix" -delete
 
+
 echo "→ publishing to npm..."
+
 cd interpreter
 npm publish
 cd ..
+
 
 echo "✓ slaylang@$VERSION shipped"

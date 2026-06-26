@@ -38,42 +38,61 @@ function installVSCodeExtension() {
         return;
     }
 
+    const extensionId = 'undefined_publisher.slay-lang';
+
     try {
         const installed = execSync(
             `${vscode} --list-extensions`,
             { encoding: 'utf8' }
         );
 
-        if (!installed.includes('slaylang')) {
-            console.log("✨ Installing SlayLang VS Code extension...");
-            execSync(
-                `${vscode} --install-extension "${vsix}"`,
-                { stdio: 'inherit' }
-            );
-            console.log("✅ SlayLang extension installed!");
+        if (installed.includes(extensionId)) {
+            return;
         }
+
+        console.log("✨ Installing SlayLang VS Code extension...");
+
+        execSync(
+            `${vscode} --install-extension "${vsix}"`,
+            {
+                stdio: 'inherit'
+            }
+        );
+
+        console.log("✅ SlayLang extension installed!");
+
     } catch {
-        // silently ignore setup failures
+        console.log("⚠️ Could not install SlayLang extension.");
     }
 }
 
 
-installVSCodeExtension();
-
-
 const args = process.argv.slice(2);
 
-if (args.length === 0) {
-    console.error("usage: slay <file.slay>");
+if (args.length === 0 || !args[0].endsWith('.slay')) {
+    console.error("bestie... that's not a .slay file");
     process.exit(1);
 }
 
-const interpreterPath = path.join(__dirname, '..', 'slay.py');
+
+// only install extension when actually running Slay code
+installVSCodeExtension();
+
+
+const interpreterPath = path.join(
+    __dirname,
+    '..',
+    'slay.py'
+);
 
 try {
-    execFileSync('python3', [interpreterPath, ...args], {
-        stdio: 'inherit'
-    });
+    execFileSync(
+        'python3',
+        [interpreterPath, ...args],
+        {
+            stdio: 'inherit'
+        }
+    );
 } catch (e) {
     process.exit(1);
 }
