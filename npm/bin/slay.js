@@ -10,12 +10,10 @@ if (args.length === 0) {
     process.exit(1);
 }
 
-const interpreterPath = path.join(__dirname, '..', 'slay.py');
+const interpreterPath = path.join(__dirname, '..', 'src', 'slay.py');
 
 try {
-    execFileSync('python3', [interpreterPath, ...args], {
-        stdio: 'inherit'
-    });
+    execFileSync('python3', [interpreterPath, ...args], { stdio: 'inherit' });
 } catch (e) {
     process.exit(1);
 }

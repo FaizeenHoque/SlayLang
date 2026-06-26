@@ -1,6 +1,6 @@
 {
     "name": "slaylang",
-    "version": "0.1.5",
+    "version": "0.2.0",
     "description": "The SlayLang interpreter",
     "scripts": {
         "postinstall": "node postinstall.js"
@@ -8,6 +8,11 @@
     "bin": {
         "slay": "./bin/slay.js"
     },
+    "files": [
+        "bin/",
+        "postinstall.js",
+        "slay-lang-*.vsix"
+    ],
     "author": "fynr1x",
     "license": "MIT"
 }
