@@ -8,7 +8,7 @@ echo "→ updating versions..."
 # update both package.json files
 sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" interpreter/package.json
 sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" vscode_ext/package.json
-
+sed -i "s/slay-lang-.*\.vsix/slay-lang-$VERSION.vsix/" interpreter/postinstall.js
 
 echo "→ packaging VS Code extension..."
 

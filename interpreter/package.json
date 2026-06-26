@@ -1,7 +1,10 @@
 {
     "name": "slaylang",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "description": "The SlayLang interpreter",
+    "scripts": {
+        "postinstall": "node postinstall.js"
+    },
     "bin": {
         "slay": "./bin/slay.js"
     },
