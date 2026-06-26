@@ -1,0 +1,13 @@
+{
+    "name": "slaylang",
+    "version": "0.1.1",
+    "description": "The SlayLang interpreter",
+    "scripts": {
+        "postinstall": "node postinstall.js"
+    },
+    "bin": {
+        "slay": "./bin/slay.js"
+    },
+    "author": "fynr1x",
+    "license": "MIT"
+}

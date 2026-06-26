@@ -2,8 +2,13 @@
     "name": "slay-lang",
     "main": "./extension.js",
     "displayName": "SlayLang",
-    "version": "0.0.1",
+    "version": "0.1.1",
     "engines": { "vscode": "^1.60.0" },
+    "activationEvents": ["onLanguage:slay"],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/fynr1x/SlayLang"
+    },
     "contributes": {
         "languages": [{
             "id": "slay",
