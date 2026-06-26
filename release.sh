@@ -8,6 +8,9 @@ if ! command -v vsce &> /dev/null; then
 fi
 
 read -p "change version to: " VERSION
+read -p "commit message (default: release v$VERSION): " COMMIT_MESSAGE
+
+COMMIT_MESSAGE=${COMMIT_MESSAGE:-"release v$VERSION"}
 
 echo "→ updating versions..."
 sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" npm/package.json
@@ -40,7 +43,7 @@ rm -f vscode_ext/slay-lang-$VERSION.vsix
 
 echo "→ tagging release..."
 git add -A
-git commit -m "release v$VERSION"
+git commit -m "$COMMIT_MESSAGE"
 git tag v$VERSION
 git push && git push --tags
 

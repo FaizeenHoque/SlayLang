@@ -15,19 +15,45 @@ spin (vibe x = 10; x >= 0; x = x - 1) {
 }
 ```
 
-That's a `for` loop. It counts down, it prints `"nonsense"` eleven times, and it does it *with style*. No semicolons forgotten, no fan-spinning infinite loops (anymore) — just clean, unbothered execution.
+That's a `for` loop. It counts down, prints `"nonsense"` eleven times, and does it *with style*.
 
 ---
 
 ## Install
 
+### Quick install
+
 ```bash
 npm install -g slaylang
+slay setup
 ```
 
-That's it. One command, and it also drops the **VS Code extension** in for you automatically (syntax highlighting included, no extra clicks, no begging the marketplace).
+`slay setup` drops the **VS Code extension** in automatically — syntax highlighting included, no extra clicks.
 
-Run it:
+### Linux (Arch/Manjaro/etc.)
+
+If you installed Node via pacman, set a user npm prefix first to avoid needing sudo:
+
+```bash
+mkdir -p ~/.npm-global
+npm config set prefix ~/.npm-global
+```
+
+Add to your shell config:
+
+```bash
+# bash/zsh — add to ~/.bashrc or ~/.zshrc
+export PATH="$HOME/.npm-global/bin:$PATH"
+```
+
+```fish
+# fish — add to ~/.config/fish/config.fish
+fish_add_path ~/.npm-global/bin
+```
+
+Restart your terminal, then run the quick install above.
+
+### Run it
 
 ```bash
 slay program.slay
@@ -40,7 +66,7 @@ slay program.slay
 Nobody asked for this. That's exactly why it had to be built.
 
 - 🔥 **Readable-ish syntax.** `vibe` instead of `let`. `yap` instead of `print`. You'll get used to it, or you won't, and that's also valid.
-- ⚙️ **A real parser and evaluator under the hood** — not a regex hack pretending to be a compiler.
+- ⚙️ **A real lexer, parser, and evaluator under the hood** — not a regex hack pretending to be a compiler.
 - 🪞 **Error messages with personality.** SlayLang doesn't fail quietly:
 
 ```
@@ -53,19 +79,172 @@ You will be informed. You will be slightly judged. You will fix your code.
 
 ## Language tour
 
-| SlayLang | Does what | You'd normally write |
-|---|---|---|
-| `vibe x = 0` | declares a variable | `let x = 0` |
-| `spin (vibe i = 0; i <= 10; i = i + 1) { ... }` | a C-style `for` loop | `for (let i = 0; i <= 10; i++) { ... }` |
-| `yap("...")` | prints to stdout | `console.log("...")` |
+### Variables
 
-> More keywords are landing as the language grows — this table reflects what's actually shipped, not what's planned. Check the [repo](https://github.com/FaizeenHoque/SlayLang) for the latest.
+```
+vibe x = 10          # mutable variable
+lockedin y = 42      # constant — don't even try to reassign it
+vibe name = "slay"
+vibe nothing = ghosted   # null
+```
+
+| SlayLang | Meaning |
+|---|---|
+| `vibe` | mutable variable (`let`) |
+| `lockedin` | constant (`const`) |
+| `ghosted` | null |
+
+---
+
+### Booleans
+
+```
+vibe isReal = nocap    # true
+vibe isCap = cap       # false
+```
+
+| SlayLang | Meaning |
+|---|---|
+| `nocap` | `true` |
+| `cap` | `false` |
+
+---
+
+### Printing
+
+```
+yap("hello world")      # prints: hello world
+rant("hello world")     # prints: hello world !!
+```
+
+| SlayLang | Meaning |
+|---|---|
+| `yap(...)` | print normally |
+| `rant(...)` | print with `!!` at the end |
+
+---
+
+### Input & type conversion
+
+```
+vibe name = snoop("what's your name? ")
+vibe age = numify(snoop("how old are you? "))
+```
+
+| SlayLang | Meaning |
+|---|---|
+| `snoop(prompt)` | read input from stdin |
+| `numify(value)` | convert string to number |
+
+---
+
+### Operators
+
+```
+vibe a = 2 ** 8      # power → 256
+vibe b = 10 % 3      # modulo → 1
+vibe c = a + b       # → 257
+```
+
+| SlayLang | Meaning |
+|---|---|
+| `+` `-` `*` `/` | standard arithmetic |
+| `**` | power / exponent |
+| `%` | modulo |
+| `==` `!=` `>` `<` `>=` `<=` | comparison |
+
+---
+
+### Conditionals
+
+```
+sus (x > 10) {
+    yap("big number")
+} mid (x == 10) {
+    yap("exactly ten")
+} tho {
+    yap("small number")
+}
+```
+
+| SlayLang | Meaning |
+|---|---|
+| `sus` | `if` |
+| `mid` | `else if` |
+| `tho` | `else` |
+
+---
+
+### Loops
+
+```
+# while loop
+grind (x > 0) {
+    yap(x)
+    x = x - 1
+}
+
+# for loop
+spin (vibe i = 0; i <= 10; i = i + 1) {
+    sus (i == 5) { skip }   # continue
+    sus (i == 8) { dip }    # break
+    yap(i)
+}
+```
+
+| SlayLang | Meaning |
+|---|---|
+| `grind` | `while` loop |
+| `spin` | `for` loop |
+| `dip` | `break` |
+| `skip` | `continue` |
+
+---
+
+### Functions
+
+```
+cook greet(name) {
+    yeet name
+}
+
+yap(greet("world"))
+```
+
+| SlayLang | Meaning |
+|---|---|
+| `cook` | define a function |
+| `yeet` | return a value |
+
+> Functions only have access to their own parameters — they don't see outer variables. Pass everything in as arguments.
+
+---
+
+### Full example
+
+```
+cook fizzbuzz(n) {
+    spin (vibe i = 1; i <= n; i = i + 1) {
+        sus (i % 15 == 0) {
+            yap("FizzBuzz")
+        } mid (i % 3 == 0) {
+            yap("Fizz")
+        } mid (i % 5 == 0) {
+            yap("Buzz")
+        } tho {
+            yap(i)
+        }
+    }
+}
+
+fizzbuzz(20)
+```
 
 ---
 
 ## Editor support
 
-The npm install automatically packages and installs the official **SlayLang VS Code extension** — syntax highlighting for `.slay` files out of the box. If you're not on VS Code, or the auto-install fails silently (it's designed to fail quietly rather than break your install), grab the `.vsix` straight from the [repo](https://github.com/FaizeenHoque/SlayLang).
+Run `slay setup` after installing to automatically install the **SlayLang VS Code extension** — syntax highlighting for `.slay` files out of the box
 
 ---
 
