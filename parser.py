@@ -205,7 +205,7 @@ class Parser:
         while self.current_token.type is not None and self.current_token.type != TokenType.RPAREN:
             if self.current_token.type == TokenType.COMMA:
                 self.advance()
-            args.append(self.parse_primary())
+            args.append(self.parse_expression())
         self.advance()  # consume ')'
         return args
 
