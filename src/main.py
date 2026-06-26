@@ -2,7 +2,7 @@ from lexer import Lexer
 from parser import Parser
 from evaluator import Evaluator
 
-with open('./program.slay', 'r') as file:
+with open('../program.slay', 'r') as file:
     code = file.read()
 
 lexer = Lexer(code)

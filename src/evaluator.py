@@ -1,3 +1,5 @@
+# evaluator.py
+
 from nodes import *
 from tokens import *
 
@@ -19,7 +21,8 @@ class Evaluator:
             "yap":    lambda args: print(*args),
             "rant":   lambda args: print(*args, "!!"),
             "snoop": lambda args: input(args[0] if args else ""),
-            "numify": lambda args: float(args[0]),
+            "floatify": lambda args: float(args[0]),
+            "intify": lambda args: int(args[0])
         }        
 
     def evaluate(self, node):
@@ -88,7 +91,8 @@ class Evaluator:
             left = self.evaluate(node.left)
             right = self.evaluate(node.right)
 
-            if type(left) != type(right) and node.operator not in ("==", "!="):
+            numeric = (int, float)
+            if type(left) != type(right) and node.operator not in ("==", "!=") and not (isinstance(left, numeric) and isinstance(right, numeric)):
                 raise Exception(f"bestie NO. you can't do {type(left).__name__} {node.operator} {type(right).__name__}, that's not it 💀")
             elif node.operator == "+":
                 return left + right
@@ -100,6 +104,10 @@ class Evaluator:
                 if right == 0:
                     raise Exception("bestie... you can divide by zero....")
                 return left / right
+            elif node.operator == "\\":
+                if right == 0:
+                    raise Exception("bestie... you can divide by zero....")
+                return left // right
             elif node.operator == "%":
                 return left % right
             elif node.operator == "**":
@@ -132,15 +140,13 @@ class Evaluator:
             else:
                 raise Exception(f"where did u find '{node.name}', ion see it in the env")
 
-            # Build a fresh local environment from params and evaluated args.
-            # Functions cannot currently close over the outer environment
-            # (no closure support).
-            local_env = {
+            previous_env = self.env
+            local_env = dict(previous_env)  # inherit globals so other functions are visible
+            local_env.update({
                 param: {"value": arg, "constant": False}
                 for param, arg in zip(function.params, args)
-            }
+            })
 
-            previous_env = self.env
             self.env = local_env
             try:
                 for statement in function.body:

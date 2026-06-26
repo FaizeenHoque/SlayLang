@@ -1,10 +1,13 @@
+# lexer.py
+
 from tokens import *
 
 
 class Token():
-    def __init__(self, type: str, value: any):
+    def __init__(self, type: str, value: any, line: int = 0):
         self.type = type
         self.value = value
+        self.line = line
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.type}, {self.value!r})"
@@ -18,6 +21,7 @@ class Lexer:
             raise Exception("bestie.. you gave nothing to lex 💀")
 
         self.index = 0
+        self.line = 1
         self.current_character = self.source[self.index]
 
     def advance(self):
@@ -35,7 +39,8 @@ class Lexer:
                 self.advance()
 
             elif self.current_character == '\n':
-                tokens.append(Token(TokenType.NEWLINE, '\n'))
+                tokens.append(Token(TokenType.NEWLINE, '\n', self.line))
+                self.line += 1
                 self.advance()
 
             elif self.current_character == '"' or self.current_character == "'":
@@ -59,13 +64,13 @@ class Lexer:
                 tokens.append(self.read_operator()) 
 
             elif self.current_character in PUNCTUATION:
-                tokens.append(Token(PUNCTUATION.get(self.current_character), self.current_character))
+                tokens.append(Token(PUNCTUATION.get(self.current_character), self.current_character, self.line))
                 self.advance()
 
             else:
                 raise Exception(f"bestie... '{self.current_character}' is not valid 💀")
 
-        tokens.append(Token(TokenType.EOF, None))
+        tokens.append(Token(TokenType.EOF, None, self.line))
         return tokens
 
     def read_string(self, opening_quote):
@@ -79,7 +84,7 @@ class Lexer:
             self.advance()
 
         self.advance()  # consume closing quote
-        return Token(TokenType.STRING, output)
+        return Token(TokenType.STRING, output, self.line)
 
     def read_number(self):
         number_value = ""
@@ -101,9 +106,9 @@ class Lexer:
             self.advance()
 
         if "." in number_value:
-            return Token(TokenType.NUMBER, float(number_value))
+            return Token(TokenType.NUMBER, float(number_value), self.line)
         else:
-            return Token(TokenType.NUMBER, int(number_value))
+            return Token(TokenType.NUMBER, int(number_value), self.line)
 
     def read_word(self):
         word_value = ""
@@ -123,7 +128,7 @@ class Lexer:
         else:
             token_type = TokenType.IDENT
 
-        return Token(token_type, word_value)
+        return Token(token_type, word_value, self.line)
 
     def skip_comment(self):
         self.advance()  # consume first '/'
@@ -135,6 +140,7 @@ class Lexer:
                 self.advance()
 
             if self.current_character == "\n":
+                self.line += 1
                 self.advance()  # consume the newline
 
     def read_operator(self):
@@ -145,12 +151,12 @@ class Lexer:
             op = current + next_char
             self.advance()
             self.advance()
-            return Token(OPERATORS[op], op)
+            return Token(OPERATORS[op], op, self.line)
         
         if current in OPERATORS:
             op = current
             self.advance()
-            return Token(OPERATORS[op], op)
+            return Token(OPERATORS[op], op, self.line)
         
         raise Exception(f"dawg.. what operator is {current}??")
 

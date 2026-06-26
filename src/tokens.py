@@ -41,6 +41,7 @@ class TokenType(Enum):
     MINUS       = "MINUS"
     MULTIPLY    = "MULTIPLY"
     DIVIDE      = "DIVIDE"
+    FLOOR_DIVIDE= "FLOOR_DIVIDE"
     MODULO      = "MODULO"
     POWER       = "POWER"
 
@@ -60,7 +61,8 @@ class TokenType(Enum):
     # Built-in functions
     PRINT       = "PRINT"
     PRINT_LOUD  = "PRINT_LOUD"
-    NUMIFY      = "NUMIFY"
+    FLOATIFY    = "FLOATIFY"
+    INTIFY      = "INTIFY"
     INPUT       = "INPUT"
 
     # Punctuation / delimiters
@@ -83,7 +85,7 @@ class TokenType(Enum):
     CATCH       = "CATCH"
     THROW       = "THROW"
 
-INBUILT_FUNCTIONS = {TokenType.PRINT, TokenType.PRINT_LOUD, TokenType.INPUT, TokenType.NUMIFY}
+INBUILT_FUNCTIONS = {TokenType.PRINT, TokenType.PRINT_LOUD, TokenType.INPUT, TokenType.INTIFY, TokenType.FLOATIFY}
 
 BOOLEANS = {TokenType.TRUE, TokenType.FALSE}
 
@@ -91,7 +93,7 @@ BINARY_OPERATORS = {
     TokenType.PLUS, TokenType.MINUS, TokenType.MULTIPLY,
     TokenType.DIVIDE, TokenType.MODULO, TokenType.POWER,
     TokenType.EQUAL, TokenType.NOT_EQUAL,
-    TokenType.GT, TokenType.LT, TokenType.GT_EQUAL, TokenType.LT_EQUAL,
+    TokenType.GT, TokenType.LT, TokenType.GT_EQUAL, TokenType.LT_EQUAL, TokenType.FLOOR_DIVIDE
 }
 
 KEYWORDS = {
@@ -121,7 +123,8 @@ BUILTINS = {
     "yap":   TokenType.PRINT,
     "rant":  TokenType.PRINT_LOUD,
     "snoop": TokenType.INPUT,
-    "numify": TokenType.NUMIFY,
+    "floatify": TokenType.FLOATIFY,
+    "intify": TokenType.INTIFY
 }
 
 OPERATORS = {
@@ -133,6 +136,7 @@ OPERATORS = {
     "-":  TokenType.MINUS,
     "*":  TokenType.MULTIPLY,
     "/":  TokenType.DIVIDE,
+    "\\":  TokenType.FLOOR_DIVIDE,
     "%":  TokenType.MODULO,
     "**": TokenType.POWER,
     "=":  TokenType.ASSIGN,

@@ -1,3 +1,5 @@
+# parser.py
+
 from nodes import *
 from tokens import *
 
@@ -32,7 +34,7 @@ class Parser:
         while True:
             if self.current_token is None:
                 raise Exception(
-                    "ran clean off the end of the token list without ever "
+                    f"Line {self.current_token.line}: ran clean off the end of the token list without ever "
                     "hitting EOF — that's a lexer bug, not a you-wrote-bad-code problem"
                 )
             if self.current_token.type == TokenType.EOF:
@@ -71,14 +73,18 @@ class Parser:
                 return self.parse_expression()
         else:
             raise Exception(
-                f"'{self.current_token.value}' (token #{self.index}, "
+                f"Line {self.current_token.line}: '{self.current_token.value}' (token #{self.index}, "
                 f"type {self.current_token.type.name}) can't start a statement. "
                 f"a statement starts with vibe/lockedin, sus, grind, cook, yeet, "
                 f"a builtin, or an identifier — this is none of those"
             )
 
     def parse_primary(self):
-        if self.current_token.type == TokenType.NUMBER:
+        if self.current_token.type == TokenType.MINUS:
+            self.advance()
+            operand = self.parse_primary()
+            return BinaryExpression(NumberLiteral(0), "-", operand)
+        elif self.current_token.type == TokenType.NUMBER:
             node = NumberLiteral(self.current_token.value)
             self.advance()
             return node
@@ -111,7 +117,7 @@ class Parser:
                 # silently. that's worse than a crash — it lets a typo turn
                 # into a mystery bug three function calls downstream.
                 raise Exception(
-                    f"'{name}' is a builtin, it needs to be called with parens. "
+                    f"Line {self.current_token.line}: '{name}' is a builtin, it needs to be called with parens. "
                     f"you wrote it bare like a variable — did you mean '{name}(...)'?"
                 )
         elif self.current_token.type == TokenType.LPAREN:
@@ -121,7 +127,7 @@ class Parser:
             return node
         else:
             raise Exception(
-                f"i don't know how to parse '{self.current_token.value}' "
+                f"Line {self.current_token.line}: i don't know how to parse '{self.current_token.value}' "
                 f"(token #{self.index}, type {self.current_token.type.name}) — "
                 f"that's not a number, string, bool, identifier, builtin, or '('"
             )
@@ -153,7 +159,7 @@ class Parser:
 
         if self.current_token is None:
             raise Exception(
-                f"opened '(' at token #{open_index} and never found the matching "
+                f"Line {self.current_token.line}: opened '(' at token #{open_index} and never found the matching "
                 f"')' — i ran straight off the end of the file looking for it"
             )
 
@@ -181,7 +187,7 @@ class Parser:
 
         if self.current_token is None:
             raise Exception(
-                "you opened a block with '{' and never closed it — i hit the "
+                "Line {self.current_token.line}: you opened a block with '{' and never closed it — i hit the "
                 "end of the file still waiting for a '}'"
             )
 
@@ -225,12 +231,12 @@ class Parser:
         if self.current_token.type == TokenType.SEMI_COLON:
             self.advance()                         # skip ';'
         else:
-            raise Exception("You missed a colon")
+            raise Exception("Line {self.current_token.line}: You missed a colon")
         condition = self.parse_expression()    # e.g. i < 10
         if self.current_token.type == TokenType.SEMI_COLON:
             self.advance()                         # skip ';'
         else:
-            raise Exception("You missed a colon")
+            raise Exception("Line {self.current_token.line}: You missed a colon")
         update = self.parse_assignment()       # e.g. i = i + 1
 
         self.advance()  # skip ')'
