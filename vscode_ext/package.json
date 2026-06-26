@@ -2,7 +2,9 @@
     "name": "slay-lang",
     "main": "./extension.js",
     "displayName": "SlayLang",
-    "version": "0.2.1",
+    "publisher": "fynr1x",
+    "icon": "slay-icon.png",
+    "version": "0.2.2",
     "engines": { "vscode": "^1.60.0" },
     "activationEvents": ["onLanguage:slay"],
     "repository": {

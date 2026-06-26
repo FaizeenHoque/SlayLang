@@ -35,6 +35,8 @@ cd ..
 
 echo "→ cleaning up..."
 rm -rf npm/src
+rm -f npm/slay-lang-$VERSION.vsix
+rm -f vscode_ext/slay-lang-$VERSION.vsix
 
 echo "→ tagging release..."
 git add -A
