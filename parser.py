@@ -230,12 +230,128 @@ class Parser:
             left = BinaryExpression(left, operator, right)
         
         return left
+    
+    def parse_block(self):
+        """
+        Parse a brace-delimited block of statements.
 
+        Expects the opening '{' to have already been consumed. Reads
+        statements until the closing '}' is reached, skipping any
+        newlines in between, then consumes the '}'.
+
+        Returns:
+            list[ASTNode]: The statements found inside the block.
+        """
+        statements = []
+        while self.current_token.type != TokenType.RBRACE:
+            if self.current_token.type == TokenType.NEWLINE:
+                self.advance()
+            else:
+                statements.append(self.parse_statement())
+        self.advance()
+        return statements
+
+    def parse_if_statement(self):
+        """
+        Parse an if / else-if / else statement.
+
+        Handles the full conditional chain: an initial 'sus' branch,
+        zero or more 'mid' (else-if) branches parsed recursively, and
+        an optional 'tho' (else) branch.
+
+        Returns:
+            IfStatement: AST node containing the condition, the if-body,
+            and optionally a chained IfStatement or else block as
+            else_body.
+        """
+        self.advance() # skip sus
+        self.advance() # skip (
+        condition = self.parse_expression()
+        self.advance() # skip )
+        self.advance() # skip {
+
+        body = self.parse_block()
+        else_body = None
+
+        if self.current_token.type == TokenType.ELSE_IF:
+            else_body = self.parse_if_statement()
+        elif self.current_token.type == TokenType.ELSE:
+            self.advance() # skip tho
+            self.advance() # skip {
+            else_body = self.parse_block()
+        
+        return IfStatement(condition, body, else_body)
+    
+    def parse_while_statement(self):
+        """
+        Parse a while loop statement.
+
+        Expects the form:  grind (<condition>) { <body> }
+
+        Consumes the 'grind' keyword, the parenthesised condition, and
+        the braced body block.
+
+        Returns:
+            WhileStatement: AST node containing the condition expression
+            and the list of body statements.
+        """
+        self.advance() # skip grind
+        self.advance() # skip (
+        condition = self.parse_expression()
+        self.advance() # skip )
+        self.advance() # skip {
+
+        body = self.parse_block()
+        return WhileStatement(condition, body)
+    
+    def parse_return_statement(self):
+        """
+        Parse a return statement.
+
+        Consumes the 'yeet' keyword then parses the expression whose
+        value will be returned.
+
+        Returns:
+            ReturnStatement: AST node wrapping the return value expression.
+        """
+        self.advance() # skip yeet
+        return ReturnStatement(self.parse_expression())
+    
+    def parse_function_declaration(self):
+        """
+        Parse a function declaration.
+
+        Expects the form:  cook <name>(<params>) { <body> }
+
+        Consumes the 'cook' keyword, the function name, the
+        comma-separated parameter list, and the braced body block.
+
+        Returns:
+            FunctionDeclaration: AST node containing the function name,
+            its parameter list, and its body statements.
+        """
+        self.advance() # skip cook
+        name = self.current_token.value
+        self.advance() # skip name
+        self.advance() # skip (
+        
+        params = []
+        while self.current_token.type != TokenType.RPAREN:
+            if self.current_token.type == TokenType.COMMA:
+                self.advance()
+            params.append(self.current_token.value)
+            self.advance()
+        
+        self.advance() # skip )
+        self.advance() # skip {
+        body = self.parse_block()
+
+        return FunctionDeclaration(name, params, body)
 
 if __name__ == "__main__":
     from lexer import Lexer
     
-    lexer = Lexer("vibe x = ((5 + 3)**2)*2")
+    lexer = Lexer('cook greet(name, age) {\nyap(name)\n}')
     tokens = lexer.tokenize()
     
     parser = Parser(tokens)
