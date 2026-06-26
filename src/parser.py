@@ -69,6 +69,8 @@ class Parser:
         elif self.current_token.type == TokenType.IDENT:
             if self.peek().type == TokenType.ASSIGN:
                 return self.parse_assignment()
+            elif self.peek().type == TokenType.LBRACKET:
+                return self.parse_index_assignment()
             else:
                 return self.parse_expression()
         else:
@@ -103,6 +105,11 @@ class Parser:
             if self.current_token is not None and self.current_token.type == TokenType.LPAREN:
                 args = self.parse_call_args()
                 return CallExpression(name, args)
+            elif self.current_token is not None and self.current_token.type == TokenType.LBRACKET:
+                self.advance()  # consume '['
+                index = self.parse_expression()
+                self.advance()  # consume ']'
+                return IndexExpression(name, index)
             else:
                 return Identifier(name)
         elif self.current_token.type in INBUILT_FUNCTIONS:
@@ -125,6 +132,15 @@ class Parser:
             node = self.parse_expression()
             self.advance()
             return node
+        elif self.current_token.type == TokenType.LBRACKET:
+            self.advance()
+            elements = []
+            while self.current_token.type != TokenType.RBRACKET: 
+                if self.current_token.type == TokenType.COMMA:
+                    self.advance()
+                elements.append(self.parse_expression())
+            self.advance()
+            return ArrayLiteral(elements)
         else:
             raise Exception(
                 f"Line {self.current_token.line}: i don't know how to parse '{self.current_token.value}' "
@@ -137,7 +153,10 @@ class Parser:
         self.advance()
         name = self.current_token.value
         self.advance()
-        self.advance()  # skip the '=' token
+        if self.current_token.type == TokenType.LBRACKET:
+            self.advance() # skip '['
+            self.advance() # skip ']'
+        self.advance() # skip '='
         value = self.parse_expression()
         return VarDeclaration(name, value, constant)
 
@@ -147,6 +166,16 @@ class Parser:
         self.advance()  # skip '='
         value = self.parse_expression()
         return VarDeclaration(name, value, False)
+
+    def parse_index_assignment(self):
+        name = self.current_token.value
+        self.advance()
+        self.advance()
+        index = self.parse_expression()
+        self.advance()
+        self.advance()
+        value = self.parse_expression()
+        return IndexAssignment(name, index, value)
 
     def parse_call_args(self):
         open_index = self.index

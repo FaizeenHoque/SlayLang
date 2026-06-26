@@ -170,3 +170,16 @@ class Evaluator:
                 return self.env[node.name]["value"]
             else:
                 raise Exception(f"buddy, variable {node.name} does NOT exist")
+        
+        elif isinstance(node, ArrayLiteral):
+            return [self.evaluate(el) for el in node.elements]
+        
+        elif isinstance(node, IndexExpression):
+            arr = self.env[node.name]["value"]
+            idx = self.evaluate(node.index)
+            return arr[idx]
+        
+        elif isinstance(node, IndexAssignment):
+            arr = self.env[node.name]["value"]
+            idx = self.evaluate(node.index)
+            arr[idx] = self.evaluate(node.value)

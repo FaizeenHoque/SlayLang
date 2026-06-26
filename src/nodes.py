@@ -128,3 +128,28 @@ class Identifier:
     def __repr__(self):
         return f"Identifier(name={self.name})"
 
+
+class ArrayLiteral:
+    def __init__(self, elements):
+        self.elements = elements
+
+    def __repr__(self):
+        return f"ArrayLiteral(elements={self.elements})"
+
+
+class IndexExpression:
+    def __init__(self, name, index):
+        self.name = name
+        self.index = index
+        
+    def __repr__(self):
+        return f"IndexExpression(name={self.name}, index={self.index})"
+
+class IndexAssignment:
+    def __init__(self, name, index, value):
+        self.name = name
+        self.index = index
+        self.value = value
+
+    def __repr__(self):
+        return f"IndexAssignment(name={self.name}, index={self.index}, value={self.value})"
