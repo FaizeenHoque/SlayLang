@@ -1,4 +1,49 @@
-grind (nocap) {
-    yap("Hello")
-    dip
+// FizzBuzz with functions, loops, conditionals, break, continue
+
+cook fizzbuzz(n) {
+    sus (n % 15 == 0) {
+        yeet "FizzBuzz"
+    } mid (n % 3 == 0) {
+        yeet "Fizz"
+    } mid (n % 5 == 0) {
+        yeet "Buzz"
+    } tho {
+        yeet n
+    }
 }
+
+// spin loop counting down, skip multiples of 7
+spin (vibe i = 1; i <= 20; i = i + 1) {
+    sus (i % 7 == 0) {
+        skip
+    }
+    yap(fizzbuzz(i))
+}
+
+// grind loop with dip
+vibe x = 0
+grind (x < 1000) {
+    x = x + 1
+    sus (x == 5) {
+        dip
+    }
+}
+yap("grind stopped at:")
+yap(x)
+
+// consts
+lockedin limit = 100
+yap(limit)
+
+// booleans
+vibe flag = nocap
+sus (flag) {
+    rant("flag is nocap!")
+} tho {
+    yap("flag is cap")
+}
+
+// user input
+vibe name = snoop("what's your name? ")
+yap("sup")
+yap(name)

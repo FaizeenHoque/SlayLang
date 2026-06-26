@@ -60,6 +60,8 @@ class Parser:
             return self.parse_return_statement()
         elif self.current_token.type == TokenType.BREAK:
             return self.parse_break_statement()
+        elif self.current_token.type == TokenType.CONTINUE:
+            return self.parse_continue_statement()
         elif self.current_token.type in INBUILT_FUNCTIONS:
             return self.parse_expression()
         elif self.current_token.type == TokenType.IDENT:

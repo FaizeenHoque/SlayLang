@@ -110,11 +110,11 @@ KEYWORDS = {
     "skip":     TokenType.CONTINUE,
     "cook":     TokenType.FUNCTION,
     "yeet":     TokenType.RETURN,
-    "fw":       TokenType.IMPORT,
-    "nochance": TokenType.TRY,
-    "ratiod":   TokenType.CATCH,
-    "flop":     TokenType.THROW,
-    "poof":     TokenType.DELETE,
+    # "fw":       TokenType.IMPORT,
+    # "nochance": TokenType.TRY,
+    # "ratiod":   TokenType.CATCH,
+    # "flop":     TokenType.THROW,
+    # "poof":     TokenType.DELETE,
 }
 
 BUILTINS = {
