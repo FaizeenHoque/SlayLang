@@ -58,6 +58,8 @@ class Parser:
             return self.parse_function_declaration()
         elif self.current_token.type == TokenType.RETURN:
             return self.parse_return_statement()
+        elif self.current_token.type == TokenType.BREAK:
+            return self.parse_break_statement()
         elif self.current_token.type in INBUILT_FUNCTIONS:
             return self.parse_expression()
         elif self.current_token.type == TokenType.IDENT:
@@ -235,18 +237,17 @@ class Parser:
 
         return ForStatement(init, condition, update, body)
 
-
-
-        self.advance()
-        self.advance()
-
-        body = self.parse_block()
-        return ForStatement(condition, body)
-        
-
     def parse_return_statement(self):
         self.advance()  # skip 'yeet'
         return ReturnStatement(self.parse_expression())
+
+    def parse_break_statement(self):
+        self.advance()  # skip 'dip'
+        return BreakStatement()
+    
+    def parse_continue_statement(self):
+        self.advance() # skip 'skip'
+        return ContinueStatement()
 
     def parse_function_declaration(self):
         self.advance()  # skip 'cook'

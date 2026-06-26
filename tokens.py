@@ -9,7 +9,7 @@ class TokenType(Enum):
     ELSE        = "ELSE"
     WHILE       = "WHILE"
     FOR         = "FOR"
-    FOR_OF      = "FOR_OF"
+    # FOR_OF      = "FOR_OF"
     BREAK       = "BREAK"
     CONTINUE    = "CONTINUE"
     RETURN      = "RETURN"
@@ -105,7 +105,7 @@ KEYWORDS = {
     "tho":      TokenType.ELSE,
     "grind":    TokenType.WHILE,
     "spin":     TokenType.FOR,
-    "roam":     TokenType.FOR_OF,
+    # "roam":     TokenType.FOR_OF,
     "dip":      TokenType.BREAK,
     "skip":     TokenType.CONTINUE,
     "cook":     TokenType.FUNCTION,

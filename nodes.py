@@ -65,6 +65,12 @@ class ReturnStatement:
     def __repr__(self):
         return f"ReturnStatement(value={self.value})"
 
+class BreakStatement:
+    pass
+
+class ContinueStatement:
+    pass
+
 
 # Expressions
 
@@ -119,3 +125,4 @@ class Identifier:
 
     def __repr__(self):
         return f"Identifier(name={self.name})"
+

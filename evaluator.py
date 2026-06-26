@@ -6,6 +6,11 @@ class ReturnException(Exception):
     def __init__(self, value):
         self.value = value
 
+class BreakException(Exception):
+    pass
+
+class ContinueException(Exception):
+    pass
 
 class Evaluator:
     def __init__(self):
@@ -47,20 +52,37 @@ class Evaluator:
 
         elif isinstance(node, WhileStatement):
             while (self.evaluate(node.condition)):
-                for statement in node.body:
-                    self.evaluate(statement)
+                try:
+                    for statement in node.body:
+                        self.evaluate(statement)
+                except BreakException:
+                    break
+                except ContinueException:
+                    continue
 
         elif isinstance(node, ForStatement):
             self.evaluate(node.init)
             while self.evaluate(node.condition):
-                for statement in node.body:
-                    self.evaluate(statement)
+                try:
+                    for statement in node.body:
+                        self.evaluate(statement)
+                except BreakException:
+                    break
+                except ContinueException:
+                    self.evaluate(node.update)
+                    continue
                 self.evaluate(node.update)
 
         elif isinstance(node, ReturnStatement):
             # Use an exception to unwind the call stack rather than threading
             # a return value back through every recursive evaluate() call.
             raise ReturnException(self.evaluate(node.value))
+        
+        elif isinstance(node, BreakStatement):
+            raise BreakException()
+
+        elif isinstance(node, ContinueStatement):
+            raise ContinueException()
 
         elif isinstance(node, BinaryExpression):
             left = self.evaluate(node.left)

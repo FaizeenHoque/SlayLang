@@ -1,0 +1,4 @@
+grind (nocap) {
+    yap("Hello")
+    dip
+}
