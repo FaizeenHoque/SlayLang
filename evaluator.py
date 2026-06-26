@@ -45,6 +45,12 @@ class Evaluator:
         Initialize the Evaluator with an empty environment.
         """
         self.env = {}
+        self.builtins = {
+            "yap":    lambda args: print(*args),
+            "rant":   lambda args: print(*args, "!!"),
+            "snoop": lambda args: input(args[0] if args else ""),
+            "numify": lambda args: float(args[0]),
+        }        
 
     def evaluate(self, node):
         """
@@ -143,27 +149,9 @@ class Evaluator:
                 return left <= right
 
         elif isinstance(node, CallExpression):
-            # --- Built-in: yap (print) ---
-            if BUILTINS.get(node.name) == TokenType.PRINT:
-                evaluated = [self.evaluate(arg) for arg in node.args]
-                print(*evaluated)
-                return
-
-            # --- Built-in: YAP (print loud) ---
-            if BUILTINS.get(node.name) == TokenType.PRINT_LOUD:
-                evaluated = [self.evaluate(arg) for arg in node.args]
-                print(*evaluated, "!!")
-                return
-
-            # --- Built-in: ask (input) ---
-            if BUILTINS.get(node.name) == TokenType.INPUT:
-                evaluated = [self.evaluate(arg) for arg in node.args]
-                return input(*evaluated)
-
-            # --- Built-in: numify (cast to float) ---
-            if BUILTINS.get(node.name) == TokenType.NUMIFY:
-                evaluated = self.evaluate(node.args[0])
-                return float(evaluated)
+            if node.name in self.builtins:
+                args = [self.evaluate(arg) for arg in node.args]
+                return self.builtins[node.name](args)
 
             # --- User-defined function call ---
             # Evaluate all arguments in the *caller's* environment before
