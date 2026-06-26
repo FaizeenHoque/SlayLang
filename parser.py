@@ -21,7 +21,8 @@ class Parser:
         Initialize the Parser with a list of tokens.
 
         Args:
-            tokens (list): A non-empty list of Token objects.
+            tokens (list): A non-empty list of Token objects ending with
+                an EOF token.
 
         Raises:
             Exception: If the token list is empty.
@@ -87,7 +88,11 @@ class Parser:
         Parse a single statement based on the current token type.
 
         Dispatches to the appropriate sub-parser depending on what kind
-        of statement starts at the current token.
+        of statement starts at the current token. Identifier tokens are
+        further disambiguated by peeking at the following token: if it
+        is an assignment operator the token is treated as the left-hand
+        side of an assignment, otherwise it is the start of an
+        expression.
 
         Returns:
             ASTNode: One of VarDeclaration, IfStatement, WhileStatement,
@@ -109,7 +114,10 @@ class Parser:
         elif self.current_token.type in INBUILT_FUNCTIONS:
             return self.parse_expression()
         elif self.current_token.type == TokenType.IDENT:
-            return self.parse_expression()
+            if self.peek().type == TokenType.ASSIGN:
+                return self.parse_assignment()
+            else:
+                return self.parse_expression()
         else:
             raise Exception(f"my guy.. never seen '{self.current_token.value}' in my life btw")
 
@@ -188,17 +196,39 @@ class Parser:
         value = self.parse_expression() 
         return VarDeclaration(name, value, constant)
     
+    def parse_assignment(self):
+        """
+        Parse a bare assignment to an already-declared variable.
+
+        Expects the form:  <identifier> = <expression>
+
+        This is distinct from parse_var_declaration() in that there is
+        no leading 'let' or 'const' keyword. The resulting node is a
+        non-constant VarDeclaration reusing the existing variable name,
+        which the interpreter is expected to treat as a mutation rather
+        than a fresh binding.
+
+        Returns:
+            VarDeclaration: AST node with constant=False, holding the
+            target variable name and the new value expression.
+        """
+        name = self.current_token.value
+        self.advance()  # skip identifier
+        self.advance()  # skip '='
+        value = self.parse_expression()
+        return VarDeclaration(name, value, False)
+
     def parse_call_args(self):
         """
         Parse the argument list of a function call.
 
         Expects the current token to be '(' on entry. Reads comma-
-        separated primary expressions until the matching ')' is found,
+        separated expressions until the matching ')' is found,
         then advances past it.
 
         Returns:
             list[ASTNode]: A (possibly empty) list of argument nodes,
-            each produced by parse_primary().
+            each produced by parse_expression().
         """
         self.advance()  # consume '('
         args = []
@@ -216,6 +246,11 @@ class Parser:
         Starts by parsing a primary expression as the left-hand operand,
         then repeatedly consumes binary operators and right-hand primaries
         to build a left-associative BinaryExpression tree.
+
+        Note: All operators are treated with equal precedence. If your
+        language requires precedence levels (e.g. * before +), this
+        method will need to be split into separate precedence climbing
+        or Pratt-parsing layers.
 
         Returns:
             ASTNode: A single primary node if no binary operator follows,
@@ -235,12 +270,13 @@ class Parser:
         """
         Parse a brace-delimited block of statements.
 
-        Expects the opening '{' to have already been consumed. Reads
-        statements until the closing '}' is reached, skipping any
-        newlines in between, then consumes the '}'.
+        Expects the opening '{' to have already been consumed by the
+        caller. Reads statements until the closing '}' is reached,
+        skipping any newlines in between, then consumes the '}'.
 
         Returns:
-            list[ASTNode]: The statements found inside the block.
+            list[ASTNode]: The statements found inside the block,
+            in source order.
         """
         statements = []
         while self.current_token.type != TokenType.RBRACE:
@@ -248,7 +284,7 @@ class Parser:
                 self.advance()
             else:
                 statements.append(self.parse_statement())
-        self.advance()
+        self.advance()  # consume '}'
         return statements
 
     def parse_if_statement(self):
@@ -259,16 +295,21 @@ class Parser:
         zero or more 'mid' (else-if) branches parsed recursively, and
         an optional 'tho' (else) branch.
 
+        Grammar (informal):
+            sus ( <condition> ) { <body> }
+            [ mid ( <condition> ) { <body> } ]*
+            [ tho { <body> } ]
+
         Returns:
             IfStatement: AST node containing the condition, the if-body,
-            and optionally a chained IfStatement or else block as
-            else_body.
+            and optionally a chained IfStatement (for else-if) or a
+            plain statement list (for else) as else_body.
         """
-        self.advance() # skip sus
-        self.advance() # skip (
+        self.advance()  # skip 'sus'
+        self.advance()  # skip '('
         condition = self.parse_expression()
-        self.advance() # skip )
-        self.advance() # skip {
+        self.advance()  # skip ')'
+        self.advance()  # skip '{'
 
         body = self.parse_block()
         else_body = None
@@ -276,8 +317,8 @@ class Parser:
         if self.current_token.type == TokenType.ELSE_IF:
             else_body = self.parse_if_statement()
         elif self.current_token.type == TokenType.ELSE:
-            self.advance() # skip tho
-            self.advance() # skip {
+            self.advance()  # skip 'tho'
+            self.advance()  # skip '{'
             else_body = self.parse_block()
         
         return IfStatement(condition, body, else_body)
@@ -295,11 +336,11 @@ class Parser:
             WhileStatement: AST node containing the condition expression
             and the list of body statements.
         """
-        self.advance() # skip grind
-        self.advance() # skip (
+        self.advance()  # skip 'grind'
+        self.advance()  # skip '('
         condition = self.parse_expression()
-        self.advance() # skip )
-        self.advance() # skip {
+        self.advance()  # skip ')'
+        self.advance()  # skip '{'
 
         body = self.parse_block()
         return WhileStatement(condition, body)
@@ -308,13 +349,17 @@ class Parser:
         """
         Parse a return statement.
 
+        Expects the form:  yeet <expression>
+
         Consumes the 'yeet' keyword then parses the expression whose
-        value will be returned.
+        value will be returned from the enclosing function. There is no
+        support for bare returns (i.e. 'yeet' with no value); one
+        expression is always required.
 
         Returns:
             ReturnStatement: AST node wrapping the return value expression.
         """
-        self.advance() # skip yeet
+        self.advance()  # skip 'yeet'
         return ReturnStatement(self.parse_expression())
     
     def parse_function_declaration(self):
@@ -324,16 +369,17 @@ class Parser:
         Expects the form:  cook <name>(<params>) { <body> }
 
         Consumes the 'cook' keyword, the function name, the
-        comma-separated parameter list, and the braced body block.
+        comma-separated parameter list (identifiers only, no defaults or
+        type annotations), and the braced body block.
 
         Returns:
             FunctionDeclaration: AST node containing the function name,
-            its parameter list, and its body statements.
+            its parameter list as plain strings, and its body statements.
         """
-        self.advance() # skip cook
+        self.advance()  # skip 'cook'
         name = self.current_token.value
-        self.advance() # skip name
-        self.advance() # skip (
+        self.advance()  # skip function name
+        self.advance()  # skip '('
         
         params = []
         while self.current_token.type != TokenType.RPAREN:
@@ -342,11 +388,12 @@ class Parser:
             params.append(self.current_token.value)
             self.advance()
         
-        self.advance() # skip )
-        self.advance() # skip {
+        self.advance()  # skip ')'
+        self.advance()  # skip '{'
         body = self.parse_block()
 
         return FunctionDeclaration(name, params, body)
+
 
 if __name__ == "__main__":
     from lexer import Lexer

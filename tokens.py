@@ -100,6 +100,7 @@ class TokenType(Enum):
     # Built-in functions
     PRINT       = "PRINT"
     PRINT_LOUD  = "PRINT_LOUD"
+    NUMIFY      = "NUMIFY"
     INPUT       = "INPUT"
 
     # Punctuation / delimiters
@@ -121,134 +122,86 @@ class TokenType(Enum):
     CATCH       = "CATCH"
     THROW       = "THROW"
 
-
-# Sets used by the parser for quick membership tests
-
-INBUILT_FUNCTIONS = {TokenType.PRINT, TokenType.PRINT_LOUD, TokenType.INPUT}
-"""set[TokenType]: Token types that represent built-in callable functions."""
+INBUILT_FUNCTIONS = {TokenType.PRINT, TokenType.PRINT_LOUD, TokenType.INPUT, TokenType.NUMIFY}
+"""set[TokenType]: Token types that map to built-in callable functions recognised by the parser."""
 
 BOOLEANS = {TokenType.TRUE, TokenType.FALSE}
-"""set[TokenType]: Token types that represent boolean literals."""
+"""set[TokenType]: Token types that represent boolean literals (nocap / cap)."""
 
 BINARY_OPERATORS = {
-    # Arithmetic
-    TokenType.PLUS,
-    TokenType.MINUS,
-    TokenType.MULTIPLY,
-    TokenType.DIVIDE,
-    TokenType.MODULO,
-    TokenType.POWER,
-    # Comparison
-    TokenType.EQUAL,
-    TokenType.NOT_EQUAL,
-    TokenType.GT,
-    TokenType.LT,
-    TokenType.GT_EQUAL,
-    TokenType.LT_EQUAL,
+    TokenType.PLUS, TokenType.MINUS, TokenType.MULTIPLY,
+    TokenType.DIVIDE, TokenType.MODULO, TokenType.POWER,
+    TokenType.EQUAL, TokenType.NOT_EQUAL,
+    TokenType.GT, TokenType.LT, TokenType.GT_EQUAL, TokenType.LT_EQUAL,
 }
-"""set[TokenType]: Token types that can appear as binary infix operators."""
-
-
-# Lookup tables used by the Lexer to classify character sequences
+"""set[TokenType]: Token types that can appear as binary infix operators in expressions."""
 
 KEYWORDS = {
-    # Booleans / null
-    "facts":    TokenType.TRUE,
+    "nocap":    TokenType.TRUE,
     "cap":      TokenType.FALSE,
     "ghosted":  TokenType.NULL,
-
-    # Variable declarations
     "vibe":     TokenType.LET,
-    "lock":     TokenType.CONST,
-
-    # Conditionals
+    "lockedin": TokenType.CONST,
     "sus":      TokenType.IF,
     "mid":      TokenType.ELSE_IF,
     "tho":      TokenType.ELSE,
-
-    # Loops
     "grind":    TokenType.WHILE,
     "spin":     TokenType.FOR,
     "roam":     TokenType.FOR_OF,
-
-    # Loop control
     "dip":      TokenType.BREAK,
     "skip":     TokenType.CONTINUE,
-
-    # Functions
     "cook":     TokenType.FUNCTION,
     "yeet":     TokenType.RETURN,
-
-    # Modules
     "fw":       TokenType.IMPORT,
-
-    # Error handling
-    "no_shot":  TokenType.TRY,
-    "ratio":    TokenType.CATCH,
+    "nochance": TokenType.TRY,
+    "ratiod":   TokenType.CATCH,
     "flop":     TokenType.THROW,
-
-    # Deletion
-    "ghost":    TokenType.DELETE,
+    "poof":     TokenType.DELETE,
 }
 """dict[str, TokenType]: Maps reserved keyword strings to their token types."""
 
 BUILTINS = {
-    "yap":          TokenType.PRINT,
-    "spill":        TokenType.PRINT_LOUD,
-    "interrogate":  TokenType.INPUT,
+    "yap":   TokenType.PRINT,
+    "rant":  TokenType.PRINT_LOUD,
+    "snoop": TokenType.INPUT,
+    "numify": TokenType.NUMIFY,
 }
 """dict[str, TokenType]: Maps built-in function names to their token types."""
 
 OPERATORS = {
-    # Arrow
-    "=>":   TokenType.ARROW,
-
-    # Logical
-    "&&":   TokenType.AND,
-    "||":   TokenType.OR,
-    "nah":  TokenType.NOT,
-
-    # Arithmetic
-    "+":    TokenType.PLUS,
-    "-":    TokenType.MINUS,
-    "*":    TokenType.MULTIPLY,
-    "/":    TokenType.DIVIDE,
-    "%":    TokenType.MODULO,
-    "**":   TokenType.POWER,
-
-    # Assignment
-    "=":    TokenType.ASSIGN,
-    "+=":   TokenType.ADD_ASSIGN,
-    "-=":   TokenType.SUB_ASSIGN,
-    "*=":   TokenType.MUL_ASSIGN,  
-    "/=":   TokenType.DIV_ASSIGN,
-
-    # Comparison
-    "==":   TokenType.EQUAL,
-    "!=":   TokenType.NOT_EQUAL,
-    ">":    TokenType.GT,
-    "<":    TokenType.LT,
-    ">=":   TokenType.GT_EQUAL,
-    "<=":   TokenType.LT_EQUAL,
+    "=>": TokenType.ARROW,
+    "&&": TokenType.AND,
+    "||": TokenType.OR,
+    "nah": TokenType.NOT,
+    "+":  TokenType.PLUS,
+    "-":  TokenType.MINUS,
+    "*":  TokenType.MULTIPLY,
+    "/":  TokenType.DIVIDE,
+    "%":  TokenType.MODULO,
+    "**": TokenType.POWER,
+    "=":  TokenType.ASSIGN,
+    "+=": TokenType.ADD_ASSIGN,
+    "-=": TokenType.SUB_ASSIGN,
+    "*=": TokenType.MUL_ASSIGN,
+    "/=": TokenType.DIV_ASSIGN,
+    "==": TokenType.EQUAL,
+    "!=": TokenType.NOT_EQUAL,
+    ">":  TokenType.GT,
+    "<":  TokenType.LT,
+    ">=": TokenType.GT_EQUAL,
+    "<=": TokenType.LT_EQUAL,
 }
 """dict[str, TokenType]: Maps operator strings to their token types."""
 
 PUNCTUATION = {
-    # Parentheses
-    "(":    TokenType.LPAREN,
-    ")":    TokenType.RPAREN,
-
-    # Brackets
-    "[":    TokenType.LBRACKET,
-    "]":    TokenType.RBRACKET,
-
-    # Braces
-    "{":    TokenType.LBRACE,
-    "}":    TokenType.RBRACE,
-
-    # Other
-    ",":    TokenType.COMMA,
-    ":":    TokenType.COLON,
-    ".":    TokenType.DOT,
+    "(": TokenType.LPAREN,
+    ")": TokenType.RPAREN,
+    "[": TokenType.LBRACKET,
+    "]": TokenType.RBRACKET,
+    "{": TokenType.LBRACE,
+    "}": TokenType.RBRACE,
+    ",": TokenType.COMMA,
+    ":": TokenType.COLON,
+    ".": TokenType.DOT,
 }
 """dict[str, TokenType]: Maps single punctuation characters to their token types."""

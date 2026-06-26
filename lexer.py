@@ -121,7 +121,7 @@ class Lexer:
                 if self.peek() == "/":
                     self.skip_comment()
                 else:
-                    raise Exception("bestie... '/' operator not implemented yet 💀") 
+                    tokens.append(self.read_operator())
 
             elif (self.current_character in OPERATORS or (self.peek() is not None and (self.current_character + self.peek()) in OPERATORS)):
                 tokens.append(self.read_operator()) 
