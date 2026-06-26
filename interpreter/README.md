@@ -69,12 +69,6 @@ The npm install automatically packages and installs the official **SlayLang VS C
 
 ---
 
-## Provenance
-
-This package is published with npm provenance attestation — every version on npm is cryptographically linked back to the exact GitHub commit it was built from. Look for the verified badge on the [npm page](https://www.npmjs.com/package/slaylang). If a package claiming to be SlayLang doesn't have it, it isn't this one.
-
----
-
 ## Contributing
 
 Found a bug? Hit an infinite loop? Made the fan spin up? [Open an issue](https://github.com/FaizeenHoque/SlayLang/issues) or send a PR. Read the code first — it's a real parser/lexer/evaluator, treat it like one.
