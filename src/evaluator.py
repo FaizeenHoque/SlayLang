@@ -18,7 +18,7 @@ class Evaluator:
     def __init__(self):
         self.env = {}
         self.builtins = {
-            "yap":    lambda args: print(*args),
+            "yap": lambda args: print(*["ghosted" if a is None else a for a in args]),
             "rant":   lambda args: print(*args, "!!"),
             "snoop": lambda args: input(args[0] if args else ""),
             "floatify": lambda args: float(args[0]),
@@ -164,6 +164,9 @@ class Evaluator:
 
         elif isinstance(node, BoolLiteral):
             return node.value
+        
+        elif isinstance(node, NullLiteral):
+            return None
 
         elif isinstance(node, Identifier):
             if node.name in self.env:
@@ -175,11 +178,15 @@ class Evaluator:
             return [self.evaluate(el) for el in node.elements]
         
         elif isinstance(node, IndexExpression):
-            arr = self.env[node.name]["value"]
+            if isinstance(node.name, str):
+                arr = self.env[node.name]["value"]
+            else:
+                arr = self.evaluate(node.name)
             idx = self.evaluate(node.index)
             return arr[idx]
         
         elif isinstance(node, IndexAssignment):
             arr = self.env[node.name]["value"]
-            idx = self.evaluate(node.index)
-            arr[idx] = self.evaluate(node.value)
+            for idx in node.indexes[:-1]:
+                arr == arr[self.evaluate(idx)]
+            arr[self.evaluate(node.indexes[-1])] = self.evaluate(node.value)

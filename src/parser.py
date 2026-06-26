@@ -98,6 +98,9 @@ class Parser:
             node = BoolLiteral(self.current_token.type == TokenType.TRUE)
             self.advance()
             return node
+        elif self.current_token.type == TokenType.NULL:
+            self.advance()
+            return NullLiteral()
         elif self.current_token.type == TokenType.IDENT:
             name = self.current_token.value
             self.advance()
@@ -109,7 +112,13 @@ class Parser:
                 self.advance()  # consume '['
                 index = self.parse_expression()
                 self.advance()  # consume ']'
-                return IndexExpression(name, index)
+                node = IndexExpression(name, index)
+                while self.current_token is not None and self.current_token.type == TokenType.LBRACKET:
+                    self.advance()
+                    index = self.parse_expression()
+                    self.advance()
+                    node = IndexExpression(node, index)
+                return node
             else:
                 return Identifier(name)
         elif self.current_token.type in INBUILT_FUNCTIONS:
@@ -138,6 +147,9 @@ class Parser:
             while self.current_token.type != TokenType.RBRACKET: 
                 if self.current_token.type == TokenType.COMMA:
                     self.advance()
+                if self.current_token.type == TokenType.NEWLINE:
+                    self.advance()
+                    continue
                 elements.append(self.parse_expression())
             self.advance()
             return ArrayLiteral(elements)
@@ -170,12 +182,16 @@ class Parser:
     def parse_index_assignment(self):
         name = self.current_token.value
         self.advance()
-        self.advance()
-        index = self.parse_expression()
-        self.advance()
+        
+        indexes = []
+        while self.current_token.type == TokenType.LBRACKET:
+            self.advance()
+            indexes.append(self.parse_expression())
+            self.advance()
+        
         self.advance()
         value = self.parse_expression()
-        return IndexAssignment(name, index, value)
+        return IndexAssignment(name, indexes, value)
 
     def parse_call_args(self):
         open_index = self.index

@@ -120,6 +120,9 @@ class BoolLiteral:
     def __repr__(self):
         return f"BoolLiteral(value={self.value})"
 
+class NullLiteral:
+    pass
+
 
 class Identifier:
     def __init__(self, name):
@@ -146,10 +149,10 @@ class IndexExpression:
         return f"IndexExpression(name={self.name}, index={self.index})"
 
 class IndexAssignment:
-    def __init__(self, name, index, value):
+    def __init__(self, name, indexes, value):
         self.name = name
-        self.index = index
+        self.indexes = indexes
         self.value = value
 
     def __repr__(self):
-        return f"IndexAssignment(name={self.name}, index={self.index}, value={self.value})"
+        return f"IndexAssignment(name={self.name}, indexes={self.indexes}, value={self.value})"
