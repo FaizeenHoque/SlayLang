@@ -1,0 +1,24 @@
+{
+    "name": "slay-lang",
+    "main": "./extension.js",
+    "displayName": "SlayLang",
+    "version": "0.0.1",
+    "engines": { "vscode": "^1.60.0" },
+    "contributes": {
+        "languages": [{
+            "id": "slay",
+            "aliases": ["SlayLang", "slay"],
+            "extensions": [".slay"],
+            "configuration": "./language-configuration.json",
+            "icon": {
+                "light": "./slay-icon.png",
+                "dark": "./slay-icon.png"
+            }
+        }],
+        "grammars": [{
+            "language": "slay",
+            "scopeName": "source.slay",
+            "path": "./syntaxes/slay.tmLanguage.json"
+        }]
+    }
+}
