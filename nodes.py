@@ -48,6 +48,15 @@ class WhileStatement:
     def __repr__(self):
         return f"WhileStatement(condition={self.condition}, body={self.body})"
 
+class ForStatement:
+    def __init__(self, init, condition, update, body):
+        self.init = init
+        self.condition = condition
+        self.update = update
+        self.body = body
+
+    def __repr__(self):
+        return f"ForStatement(init={self.init}, condition={self.condition}, update={self.update}, body={self.body})"
 
 class ReturnStatement:
     def __init__(self, value):

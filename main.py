@@ -2,9 +2,8 @@ from lexer import Lexer
 from parser import Parser
 from evaluator import Evaluator
 
-code = """
-yap(2/0)
-"""
+with open('./program.slay', 'r') as file:
+    code = file.read()
 
 lexer = Lexer(code)
 tokens = lexer.tokenize()

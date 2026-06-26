@@ -50,6 +50,13 @@ class Evaluator:
                 for statement in node.body:
                     self.evaluate(statement)
 
+        elif isinstance(node, ForStatement):
+            self.evaluate(node.init)
+            while self.evaluate(node.condition):
+                for statement in node.body:
+                    self.evaluate(statement)
+                self.evaluate(node.update)
+
         elif isinstance(node, ReturnStatement):
             # Use an exception to unwind the call stack rather than threading
             # a return value back through every recursive evaluate() call.

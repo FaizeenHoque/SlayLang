@@ -71,7 +71,8 @@ class TokenType(Enum):
     LBRACE      = "LBRACE"
     RBRACE      = "RBRACE"
     COMMA       = "COMMA"
-    COLON       = "COLON"      
+    COLON       = "COLON"
+    SEMI_COLON  = "SEMI_COLON"            
     DOT         = "DOT"        
 
     # Miscellaneous
@@ -156,5 +157,6 @@ PUNCTUATION = {
     "}": TokenType.RBRACE,
     ",": TokenType.COMMA,
     ":": TokenType.COLON,
+    ";": TokenType.SEMI_COLON,
     ".": TokenType.DOT,
 }

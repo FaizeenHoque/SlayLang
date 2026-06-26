@@ -52,6 +52,8 @@ class Parser:
             return self.parse_if_statement()
         elif self.current_token.type == TokenType.WHILE:
             return self.parse_while_statement()
+        elif self.current_token.type == TokenType.FOR:
+            return self.parse_for_statement()
         elif self.current_token.type == TokenType.FUNCTION:
             return self.parse_function_declaration()
         elif self.current_token.type == TokenType.RETURN:
@@ -81,7 +83,7 @@ class Parser:
             self.advance()
             return node
         elif self.current_token.type in BOOLEANS:
-            node = BoolLiteral(self.current_token.value)
+            node = BoolLiteral(self.current_token.type == TokenType.TRUE)
             self.advance()
             return node
         elif self.current_token.type == TokenType.IDENT:
@@ -210,6 +212,37 @@ class Parser:
 
         body = self.parse_block()
         return WhileStatement(condition, body)
+
+    def parse_for_statement(self):
+        self.advance()  # skip 'spin'
+        self.advance()  # skip '('
+
+        init = self.parse_var_declaration()    # e.g. vibe i = 0
+        if self.current_token.type == TokenType.SEMI_COLON:
+            self.advance()                         # skip ';'
+        else:
+            raise Exception("You missed a colon")
+        condition = self.parse_expression()    # e.g. i < 10
+        if self.current_token.type == TokenType.SEMI_COLON:
+            self.advance()                         # skip ';'
+        else:
+            raise Exception("You missed a colon")
+        update = self.parse_assignment()       # e.g. i = i + 1
+
+        self.advance()  # skip ')'
+        self.advance()  # skip '{'
+        body = self.parse_block()
+
+        return ForStatement(init, condition, update, body)
+
+
+
+        self.advance()
+        self.advance()
+
+        body = self.parse_block()
+        return ForStatement(condition, body)
+        
 
     def parse_return_statement(self):
         self.advance()  # skip 'yeet'
