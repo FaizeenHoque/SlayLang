@@ -9,7 +9,8 @@ const extensionId = "undefined_publisher.slay-lang";
 
 function commandExists(cmd) {
     try {
-        execSync(`which ${cmd}`, { stdio: "ignore" });
+        const check = process.platform === 'win32' ? `where ${cmd}` : `which ${cmd}`;
+        execSync(check, { stdio: "ignore" });
         return true;
     } catch {
         return false;
@@ -18,13 +19,6 @@ function commandExists(cmd) {
 
 function installExtension() {
     console.log("\n✨ Setting up SlayLang...\n");
-
-    if (process.getuid && process.getuid() === 0) {
-        console.log("⚠️  Detected sudo/root. Skipping VS Code extension install.");
-        console.log("   Run this manually as your normal user:");
-        console.log(`   code --install-extension "${vsix}"\n`);
-        return;
-    }
 
     if (!fs.existsSync(vsix)) {
         console.log("⚠️  VS Code extension not found.");
@@ -37,8 +31,7 @@ function installExtension() {
     else if (commandExists("codium")) vscode = "codium";
 
     if (!vscode) {
-        console.log("⚠️  VS Code/VSCodium not found. Install the extension manually:");
-        console.log(`   ${vsix}`);
+        console.log("⚠️  VS Code/VSCodium not found.");
         return;
     }
 
