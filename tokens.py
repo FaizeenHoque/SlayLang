@@ -2,46 +2,6 @@ from enum import Enum
 
 
 class TokenType(Enum):
-    """
-    Enumeration of every token type recognised by the Lexer.
-
-    Members are grouped by category below. The string value of each
-    member matches its name and is used for readable repr output.
-
-    Categories
-    ----------
-    Control flow:
-        IF, ELSE_IF, ELSE, WHILE, FOR, FOR_OF, BREAK, CONTINUE,
-        RETURN, FUNCTION
-
-    Variables / declarations:
-        LET, CONST, ASSIGN, ADD_ASSIGN, SUB_ASSIGN, MUL_ASSIGN, DIV_ASSIGN
-
-    Literals:
-        NUMBER, STRING, TRUE, FALSE, NULL
-
-    Identifiers & structure:
-        IDENT, EOF, NEWLINE
-
-    Arithmetic operators:
-        PLUS, MINUS, MULTIPLY, DIVIDE, MODULO, POWER
-
-    Comparison operators:
-        EQUAL, NOT_EQUAL, GT, LT, GT_EQUAL, LT_EQUAL
-
-    Logical operators:
-        AND, OR, NOT
-
-    Built-in functions:
-        PRINT, PRINT_LOUD, INPUT
-
-    Punctuation / delimiters:
-        LPAREN, RPAREN, LBRACKET, RBRACKET, LBRACE, RBRACE,
-        COMMA, COLON, DOT
-
-    Miscellaneous:
-        ARROW, DELETE, IMPORT, TRY, CATCH, THROW
-    """
 
     # Control flow
     IF          = "IF"
@@ -123,10 +83,8 @@ class TokenType(Enum):
     THROW       = "THROW"
 
 INBUILT_FUNCTIONS = {TokenType.PRINT, TokenType.PRINT_LOUD, TokenType.INPUT, TokenType.NUMIFY}
-"""set[TokenType]: Token types that map to built-in callable functions recognised by the parser."""
 
 BOOLEANS = {TokenType.TRUE, TokenType.FALSE}
-"""set[TokenType]: Token types that represent boolean literals (nocap / cap)."""
 
 BINARY_OPERATORS = {
     TokenType.PLUS, TokenType.MINUS, TokenType.MULTIPLY,
@@ -134,7 +92,6 @@ BINARY_OPERATORS = {
     TokenType.EQUAL, TokenType.NOT_EQUAL,
     TokenType.GT, TokenType.LT, TokenType.GT_EQUAL, TokenType.LT_EQUAL,
 }
-"""set[TokenType]: Token types that can appear as binary infix operators in expressions."""
 
 KEYWORDS = {
     "nocap":    TokenType.TRUE,
@@ -158,7 +115,6 @@ KEYWORDS = {
     "flop":     TokenType.THROW,
     "poof":     TokenType.DELETE,
 }
-"""dict[str, TokenType]: Maps reserved keyword strings to their token types."""
 
 BUILTINS = {
     "yap":   TokenType.PRINT,
@@ -166,7 +122,6 @@ BUILTINS = {
     "snoop": TokenType.INPUT,
     "numify": TokenType.NUMIFY,
 }
-"""dict[str, TokenType]: Maps built-in function names to their token types."""
 
 OPERATORS = {
     "=>": TokenType.ARROW,
@@ -191,7 +146,6 @@ OPERATORS = {
     ">=": TokenType.GT_EQUAL,
     "<=": TokenType.LT_EQUAL,
 }
-"""dict[str, TokenType]: Maps operator strings to their token types."""
 
 PUNCTUATION = {
     "(": TokenType.LPAREN,
@@ -204,4 +158,3 @@ PUNCTUATION = {
     ":": TokenType.COLON,
     ".": TokenType.DOT,
 }
-"""dict[str, TokenType]: Maps single punctuation characters to their token types."""

@@ -3,47 +3,12 @@ from tokens import *
 
 
 class ReturnException(Exception):
-    """
-    Control-flow exception used to unwind the call stack on a return statement.
-
-    Raised by the evaluator when a ReturnStatement node is encountered inside
-    a function body. Caught by the CallExpression handler, which extracts the
-    return value and resumes normal execution in the caller's environment.
-
-    Attributes:
-        value (any): The evaluated return value to be handed back to the caller.
-    """
-
     def __init__(self, value):
-        """
-        Initialize the ReturnException with the value being returned.
-
-        Args:
-            value (any): The evaluated result of the return expression.
-        """
         self.value = value
 
 
 class Evaluator:
-    """
-    Tree-walking interpreter that evaluates an AST produced by the Parser.
-
-    The Evaluator performs a single-pass recursive walk over the AST,
-    executing each node in place. State is maintained in a flat environment
-    dictionary (self.env) that maps variable and function names to their
-    stored values. Function calls temporarily swap out the global environment
-    for a local one, restoring it on return.
-
-    Attributes:
-        env (dict): The current variable/function environment. Each variable
-            entry is a dict of the form {"value": <any>, "constant": <bool>}.
-            Function entries store the raw FunctionDeclaration node directly.
-    """
-
     def __init__(self):
-        """
-        Initialize the Evaluator with an empty environment.
-        """
         self.env = {}
         self.builtins = {
             "yap":    lambda args: print(*args),
@@ -53,33 +18,6 @@ class Evaluator:
         }        
 
     def evaluate(self, node):
-        """
-        Recursively evaluate an AST node and return its result.
-
-        Dispatches on the concrete type of *node*, executing the appropriate
-        semantics for each node kind. Statement nodes (Program, VarDeclaration,
-        IfStatement, WhileStatement, FunctionDeclaration, ReturnStatement)
-        produce side-effects and return None. Expression nodes (BinaryExpression,
-        CallExpression, NumberLiteral, StringLiteral, BoolLiteral, Identifier)
-        return a Python value.
-
-        Args:
-            node (ASTNode): Any node produced by the Parser.
-
-        Returns:
-            any: The result of evaluating an expression node, or None for
-            statement nodes that do not produce a value.
-
-        Raises:
-            Exception: If a constant variable is reassigned.
-            Exception: If a binary operator is applied to incompatible types
-                (except == and !=, which allow cross-type comparison).
-            Exception: If an undefined variable or function name is referenced.
-            Exception: If an unknown node type is passed (falls through all
-                branches silently — currently no catch-all guard).
-            ReturnException: Raised internally when a ReturnStatement is
-                evaluated; expected to be caught by the CallExpression handler.
-        """
         if isinstance(node, Program):
             for statement in node.statements:
                 self.evaluate(statement)
@@ -130,6 +68,8 @@ class Evaluator:
             elif node.operator == "*":
                 return left * right
             elif node.operator == "/":
+                if right == 0:
+                    raise Exception("bestie... you can divide by zero....")
                 return left / right
             elif node.operator == "%":
                 return left % right

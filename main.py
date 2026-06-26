@@ -3,14 +3,7 @@ from parser import Parser
 from evaluator import Evaluator
 
 code = """
-cook add(a, b) {
-    yeet a + b
-}
-
-vibe a = numify(snoop("first number: "))
-vibe b = numify(snoop("second number: "))
-
-yap("answer:", add(a, b))
+yap(2/0)
 """
 
 lexer = Lexer(code)

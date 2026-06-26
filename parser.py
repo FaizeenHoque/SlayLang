@@ -2,46 +2,19 @@ from nodes import *
 from tokens import *
 
 class Parser:
-    """
-    Parses a flat list of tokens into an Abstract Syntax Tree (AST).
-
-    The parser uses recursive descent to handle operator precedence and
-    nested expressions. It consumes tokens produced by the Lexer and
-    builds a Program node whose children represent every top-level
-    statement in the source.
-
-    Attributes:
-        tokens (list): The full list of Token objects to parse.
-        index (int): The current position in the token list.
-        current_token (Token): The token at the current index.
-    """
-
     def __init__(self, tokens):
-        """
-        Initialize the Parser with a list of tokens.
-
-        Args:
-            tokens (list): A non-empty list of Token objects ending with
-                an EOF token.
-
-        Raises:
-            Exception: If the token list is empty.
-        """
         self.tokens = tokens
-        
+
         if self.tokens == []:
-            raise Exception("bestie... no tokens to parse 💀")
+            raise Exception(
+                "bestie... i got zero tokens. either your lexer is broken "
+                "or you fed me an empty file 💀"
+            )
 
         self.index = 0
         self.current_token = self.tokens[self.index]
 
     def advance(self):
-        """
-        Move to the next token in the list.
-
-        Increments the index and updates current_token. If the end of
-        the token list is reached, current_token is set to None.
-        """
         self.index += 1
         if self.index >= len(self.tokens):
             self.current_token = None
@@ -49,58 +22,30 @@ class Parser:
             self.current_token = self.tokens[self.index]
 
     def peek(self):
-        """
-        Look at the next token without consuming it.
-
-        Returns:
-            Token | None: The token immediately after the current one,
-            or None if the current token is the last in the list.
-        """
         if self.index + 1 >= len(self.tokens):
             return None
         return self.tokens[self.index + 1]
 
     def parse(self):
-        """
-        Parse the entire token stream into a Program AST node.
-
-        Iterates over all tokens, skipping newlines and delegating each
-        non-trivial token to parse_statement(), until the EOF token is
-        reached.
-
-        Returns:
-            Program: The root AST node containing all top-level statements.
-        """
         statements = []
 
-        while self.current_token.type != TokenType.EOF:
-            # skip new lines
+        while True:
+            if self.current_token is None:
+                raise Exception(
+                    "ran clean off the end of the token list without ever "
+                    "hitting EOF — that's a lexer bug, not a you-wrote-bad-code problem"
+                )
+            if self.current_token.type == TokenType.EOF:
+                break
             if self.current_token.type == TokenType.NEWLINE:
                 self.advance()
             else:
                 statement = self.parse_statement()
                 statements.append(statement)
-        
+
         return Program(statements)
-    
+
     def parse_statement(self):
-        """
-        Parse a single statement based on the current token type.
-
-        Dispatches to the appropriate sub-parser depending on what kind
-        of statement starts at the current token. Identifier tokens are
-        further disambiguated by peeking at the following token: if it
-        is an assignment operator the token is treated as the left-hand
-        side of an assignment, otherwise it is the start of an
-        expression.
-
-        Returns:
-            ASTNode: One of VarDeclaration, IfStatement, WhileStatement,
-            FunctionDeclaration, ReturnStatement, or an expression node.
-
-        Raises:
-            Exception: If the current token does not begin a valid statement.
-        """
         if self.current_token.type in (TokenType.LET, TokenType.CONST):
             return self.parse_var_declaration()
         elif self.current_token.type == TokenType.IF:
@@ -119,25 +64,14 @@ class Parser:
             else:
                 return self.parse_expression()
         else:
-            raise Exception(f"my guy.. never seen '{self.current_token.value}' in my life btw")
+            raise Exception(
+                f"'{self.current_token.value}' (token #{self.index}, "
+                f"type {self.current_token.type.name}) can't start a statement. "
+                f"a statement starts with vibe/lockedin, sus, grind, cook, yeet, "
+                f"a builtin, or an identifier — this is none of those"
+            )
 
     def parse_primary(self):
-        """
-        Parse a primary (atomic) expression.
-
-        Handles the smallest indivisible units of an expression:
-        number literals, string literals, boolean literals, identifiers
-        (which may be followed by a call argument list), built-in
-        function calls, and parenthesised sub-expressions.
-
-        Returns:
-            ASTNode: One of NumberLiteral, StringLiteral, BoolLiteral,
-            Identifier, or CallExpression; or the result of a recursive
-            parse_expression() call for parenthesised groups.
-
-        Raises:
-            Exception: If the current token cannot start a primary expression.
-        """
         if self.current_token.type == TokenType.NUMBER:
             node = NumberLiteral(self.current_token.value)
             self.advance()
@@ -154,64 +88,48 @@ class Parser:
             name = self.current_token.value
             self.advance()
 
-            if self.current_token.type is not None and self.current_token.type == TokenType.LPAREN:
+            if self.current_token is not None and self.current_token.type == TokenType.LPAREN:
                 args = self.parse_call_args()
                 return CallExpression(name, args)
             else:
                 return Identifier(name)
         elif self.current_token.type in INBUILT_FUNCTIONS:
-            name = self.current_token.value  
+            name = self.current_token.value
             self.advance()
-            
-            if self.current_token.type is not None and self.current_token.type == TokenType.LPAREN:
+
+            if self.current_token is not None and self.current_token.type == TokenType.LPAREN:
                 args = self.parse_call_args()
                 return CallExpression(name, args)
-        elif self.current_token.type == TokenType.LPAREN:  
+            else:
+                # NOTE: this branch used to fall through and return None
+                # silently. that's worse than a crash — it lets a typo turn
+                # into a mystery bug three function calls downstream.
+                raise Exception(
+                    f"'{name}' is a builtin, it needs to be called with parens. "
+                    f"you wrote it bare like a variable — did you mean '{name}(...)'?"
+                )
+        elif self.current_token.type == TokenType.LPAREN:
             self.advance()
             node = self.parse_expression()
             self.advance()
             return node
         else:
-            raise Exception(f"i dont know how you expect me to parse expression {self.current_token.value}")
-    
+            raise Exception(
+                f"i don't know how to parse '{self.current_token.value}' "
+                f"(token #{self.index}, type {self.current_token.type.name}) — "
+                f"that's not a number, string, bool, identifier, builtin, or '('"
+            )
+
     def parse_var_declaration(self):
-        """
-        Parse a variable declaration statement (let or const).
-
-        Expects the form:  <let|const> <identifier> = <expression>
-
-        Advances past the keyword, reads the variable name, skips the
-        assignment operator, then delegates to parse_expression() for
-        the initialiser value.
-
-        Returns:
-            VarDeclaration: AST node holding the variable name, its
-            initial value expression, and whether it is constant.
-        """
         constant = self.current_token.type == TokenType.CONST
         self.advance()
         name = self.current_token.value
         self.advance()
         self.advance()  # skip the '=' token
-        value = self.parse_expression() 
+        value = self.parse_expression()
         return VarDeclaration(name, value, constant)
-    
+
     def parse_assignment(self):
-        """
-        Parse a bare assignment to an already-declared variable.
-
-        Expects the form:  <identifier> = <expression>
-
-        This is distinct from parse_var_declaration() in that there is
-        no leading 'let' or 'const' keyword. The resulting node is a
-        non-constant VarDeclaration reusing the existing variable name,
-        which the interpreter is expected to treat as a mutation rather
-        than a fresh binding.
-
-        Returns:
-            VarDeclaration: AST node with constant=False, holding the
-            target variable name and the new value expression.
-        """
         name = self.current_token.value
         self.advance()  # skip identifier
         self.advance()  # skip '='
@@ -219,43 +137,24 @@ class Parser:
         return VarDeclaration(name, value, False)
 
     def parse_call_args(self):
-        """
-        Parse the argument list of a function call.
-
-        Expects the current token to be '(' on entry. Reads comma-
-        separated expressions until the matching ')' is found,
-        then advances past it.
-
-        Returns:
-            list[ASTNode]: A (possibly empty) list of argument nodes,
-            each produced by parse_expression().
-        """
+        open_index = self.index
         self.advance()  # consume '('
         args = []
-        while self.current_token.type is not None and self.current_token.type != TokenType.RPAREN:
+        while self.current_token is not None and self.current_token.type != TokenType.RPAREN:
             if self.current_token.type == TokenType.COMMA:
                 self.advance()
             args.append(self.parse_expression())
+
+        if self.current_token is None:
+            raise Exception(
+                f"opened '(' at token #{open_index} and never found the matching "
+                f"')' — i ran straight off the end of the file looking for it"
+            )
+
         self.advance()  # consume ')'
         return args
 
     def parse_expression(self):
-        """
-        Parse a binary expression with left-to-right associativity.
-
-        Starts by parsing a primary expression as the left-hand operand,
-        then repeatedly consumes binary operators and right-hand primaries
-        to build a left-associative BinaryExpression tree.
-
-        Note: All operators are treated with equal precedence. If your
-        language requires precedence levels (e.g. * before +), this
-        method will need to be split into separate precedence climbing
-        or Pratt-parsing layers.
-
-        Returns:
-            ASTNode: A single primary node if no binary operator follows,
-            or a (possibly nested) BinaryExpression node otherwise.
-        """
         left = self.parse_primary()
 
         while self.current_token is not None and self.current_token.type in BINARY_OPERATORS:
@@ -263,48 +162,27 @@ class Parser:
             self.advance()
             right = self.parse_primary()
             left = BinaryExpression(left, operator, right)
-        
+
         return left
-    
+
     def parse_block(self):
-        """
-        Parse a brace-delimited block of statements.
-
-        Expects the opening '{' to have already been consumed by the
-        caller. Reads statements until the closing '}' is reached,
-        skipping any newlines in between, then consumes the '}'.
-
-        Returns:
-            list[ASTNode]: The statements found inside the block,
-            in source order.
-        """
         statements = []
-        while self.current_token.type != TokenType.RBRACE:
+        while self.current_token is not None and self.current_token.type != TokenType.RBRACE:
             if self.current_token.type == TokenType.NEWLINE:
                 self.advance()
             else:
                 statements.append(self.parse_statement())
+
+        if self.current_token is None:
+            raise Exception(
+                "you opened a block with '{' and never closed it — i hit the "
+                "end of the file still waiting for a '}'"
+            )
+
         self.advance()  # consume '}'
         return statements
 
     def parse_if_statement(self):
-        """
-        Parse an if / else-if / else statement.
-
-        Handles the full conditional chain: an initial 'sus' branch,
-        zero or more 'mid' (else-if) branches parsed recursively, and
-        an optional 'tho' (else) branch.
-
-        Grammar (informal):
-            sus ( <condition> ) { <body> }
-            [ mid ( <condition> ) { <body> } ]*
-            [ tho { <body> } ]
-
-        Returns:
-            IfStatement: AST node containing the condition, the if-body,
-            and optionally a chained IfStatement (for else-if) or a
-            plain statement list (for else) as else_body.
-        """
         self.advance()  # skip 'sus'
         self.advance()  # skip '('
         condition = self.parse_expression()
@@ -320,22 +198,10 @@ class Parser:
             self.advance()  # skip 'tho'
             self.advance()  # skip '{'
             else_body = self.parse_block()
-        
+
         return IfStatement(condition, body, else_body)
-    
+
     def parse_while_statement(self):
-        """
-        Parse a while loop statement.
-
-        Expects the form:  grind (<condition>) { <body> }
-
-        Consumes the 'grind' keyword, the parenthesised condition, and
-        the braced body block.
-
-        Returns:
-            WhileStatement: AST node containing the condition expression
-            and the list of body statements.
-        """
         self.advance()  # skip 'grind'
         self.advance()  # skip '('
         condition = self.parse_expression()
@@ -344,50 +210,24 @@ class Parser:
 
         body = self.parse_block()
         return WhileStatement(condition, body)
-    
+
     def parse_return_statement(self):
-        """
-        Parse a return statement.
-
-        Expects the form:  yeet <expression>
-
-        Consumes the 'yeet' keyword then parses the expression whose
-        value will be returned from the enclosing function. There is no
-        support for bare returns (i.e. 'yeet' with no value); one
-        expression is always required.
-
-        Returns:
-            ReturnStatement: AST node wrapping the return value expression.
-        """
         self.advance()  # skip 'yeet'
         return ReturnStatement(self.parse_expression())
-    
+
     def parse_function_declaration(self):
-        """
-        Parse a function declaration.
-
-        Expects the form:  cook <name>(<params>) { <body> }
-
-        Consumes the 'cook' keyword, the function name, the
-        comma-separated parameter list (identifiers only, no defaults or
-        type annotations), and the braced body block.
-
-        Returns:
-            FunctionDeclaration: AST node containing the function name,
-            its parameter list as plain strings, and its body statements.
-        """
         self.advance()  # skip 'cook'
         name = self.current_token.value
         self.advance()  # skip function name
         self.advance()  # skip '('
-        
+
         params = []
         while self.current_token.type != TokenType.RPAREN:
             if self.current_token.type == TokenType.COMMA:
                 self.advance()
             params.append(self.current_token.value)
             self.advance()
-        
+
         self.advance()  # skip ')'
         self.advance()  # skip '{'
         body = self.parse_block()
@@ -397,10 +237,10 @@ class Parser:
 
 if __name__ == "__main__":
     from lexer import Lexer
-    
+
     lexer = Lexer('cook greet(name, age) {\nyap(name)\n}')
     tokens = lexer.tokenize()
-    
+
     parser = Parser(tokens)
     ast = parser.parse()
     print(ast)
