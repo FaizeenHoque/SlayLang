@@ -1,0 +1,118 @@
+cook isDigit(c) {
+    yeet c == "0" || c == "1" || c == "2" || c == "3" || c == "4" || c == "5" || c == "6" || c == "7" || c == "8" || c == "9"
+}
+cook charToNum(c) {
+    sus (c == "0") { yeet 0 }
+    sus (c == "1") { yeet 1 }
+    sus (c == "2") { yeet 2 }
+    sus (c == "3") { yeet 3 }
+    sus (c == "4") { yeet 4 }
+    sus (c == "5") { yeet 5 }
+    sus (c == "6") { yeet 6 }
+    sus (c == "7") { yeet 7 }
+    sus (c == "8") { yeet 8 }
+    sus (c == "9") { yeet 9 }
+    yeet -1
+}
+vibe tokens[] = []
+vibe tokenTypes[] = []
+vibe tokenCount[] = [0]
+vibe pos[] = [0]
+cook addToken(type, val) {
+    push(tokens, val)
+    push(tokenTypes, type)
+    tokenCount[0] = tokenCount[0] + 1
+}
+cook lexNumber(src, start, srcLen) {
+    vibe num = 0
+    vibe i = start
+    grind (i < srcLen) {
+        vibe c = src[i]
+        sus (isDigit(c)) {
+            num = num * 10 + charToNum(c)
+            i = i + 1
+        } tho {
+            dip
+        }
+    }
+    vibe result[] = [num, i]
+    yeet result
+}
+cook lex(src, srcLen) {
+    vibe i = 0
+    grind (i < srcLen) {
+        vibe c = src[i]
+        sus (isDigit(c)) {
+            vibe res[] = lexNumber(src, i, srcLen)
+            addToken("NUM", res[0])
+            i = res[1]
+        } mid (c == "+") {
+            addToken("PLUS", 0)
+            i = i + 1
+        } mid (c == "-") {
+            addToken("MINUS", 0)
+            i = i + 1
+        } mid (c == "*") {
+            addToken("MUL", 0)
+            i = i + 1
+        } mid (c == "/") {
+            addToken("DIV", 0)
+            i = i + 1
+        } mid (c == " ") {
+            i = i + 1
+        } tho {
+            yap("unknown char")
+            i = i + 1
+        }
+    }
+    addToken("EOF", 0)
+}
+cook currentType() {
+    yeet tokenTypes[pos[0]]
+}
+cook currentVal() {
+    yeet tokens[pos[0]]
+}
+cook parseExprTerm() {
+    vibe left = currentVal()
+    pos[0] = pos[0] + 1
+    grind (currentType() == "MUL" || currentType() == "DIV") {
+        sus (currentType() == "MUL") {
+            pos[0] = pos[0] + 1
+            left = left * currentVal()
+            pos[0] = pos[0] + 1
+        } tho {
+            pos[0] = pos[0] + 1
+            left = left / currentVal()
+            pos[0] = pos[0] + 1
+        }
+    }
+    yeet left
+}
+cook parseExpr() {
+    vibe left = parseExprTerm()
+    grind (currentType() == "PLUS" || currentType() == "MINUS") {
+        sus (currentType() == "PLUS") {
+            pos[0] = pos[0] + 1
+            left = left + parseExprTerm()
+        } tho {
+            pos[0] = pos[0] + 1
+            left = left - parseExprTerm()
+        }
+    }
+    yeet left
+}
+vibe src[] = ["2", "+", "3", "*", "4"]
+lex(src, 5)
+vibe result = parseExpr()
+yap("2 + 3 * 4 =")
+yap(result)
+pos[0] = 0
+tokens = []
+tokenTypes = []
+tokenCount[0] = 0
+vibe src2[] = ["1", "0", "+", "5", "*", "2", "-", "3"]
+lex(src2, 8)
+vibe result2 = parseExpr()
+yap("10 + 5 * 2 - 3 =")
+yap(result2)

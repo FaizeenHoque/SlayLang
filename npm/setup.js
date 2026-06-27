@@ -37,14 +37,15 @@ function installExtension() {
 
     try {
         const installed = execSync(`${vscode} --list-extensions`, { encoding: "utf8" });
+
         if (installed.includes(extensionId)) {
-            console.log("✅ SlayLang extension already installed.");
-            return;
+            console.log("Updating SlayLang extension...");
+        } else {
+            console.log("Installing SlayLang extension...");
         }
 
-        console.log("Installing SlayLang VS Code extension...");
-        execSync(`${vscode} --install-extension "${vsix}"`, { stdio: "inherit" });
-        console.log("✅ SlayLang extension installed!");
+        execSync(`${vscode} --install-extension "${vsix}" --force`, { stdio: "inherit" });
+        console.log("✅ SlayLang extension ready!");
     } catch (err) {
         console.log("⚠️  Could not install extension automatically.");
         console.log(`   Install manually: code --install-extension "${vsix}"`);

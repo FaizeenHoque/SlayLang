@@ -118,6 +118,11 @@ class CallExpression:
         """Show the call expression in a readable debug form."""
         return f"CallExpression(name={self.name}, args={self.args})"
 
+class UnaryExpression:
+    def __init__(self, operator, operand):
+        self.operator = operator
+        self.operand = operand
+
 
 # Literals & identifiers
 

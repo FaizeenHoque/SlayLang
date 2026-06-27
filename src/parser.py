@@ -78,6 +78,8 @@ class Parser:
         elif self.current_token.type == TokenType.IDENT:
             if self.peek() is not None and self.peek().type == TokenType.ASSIGN:
                 return self.parse_assignment()
+            elif self.peek() is not None and self.peek().type in (TokenType.ADD_ASSIGN, TokenType.SUB_ASSIGN, TokenType.MUL_ASSIGN, TokenType.DIV_ASSIGN):
+                return self.parse_compound_assignment()
             elif self.peek() is not None and self.peek().type == TokenType.LBRACKET:
                 return self.parse_index_assignment()
             else:
@@ -190,6 +192,7 @@ class Parser:
         self.advance()  # skip '='
         value = self.parse_expression()
         return VarDeclaration(name, value, False)
+    
 
     def parse_index_assignment(self):
         """Read an assignment that writes into one or more array positions."""
@@ -227,8 +230,28 @@ class Parser:
 
     def parse_expression(self):
         """Parse a complete expression, starting with comparison level rules."""
-        return self.parse_comparison()
-
+        return self.parse_logical()
+    
+    def parse_logical(self):
+        left = self.parse_comparison()
+        while self.current_token is not None and self.current_token.type in (TokenType.AND, TokenType.OR):
+            operator = self.current_token.value
+            self.advance()
+            right = self.parse_comparison()
+            left = BinaryExpression(left, operator, right)
+        return left
+    
+    def parse_compound_assignment(self):
+        """Read a compound assignment that changes an existing name."""
+        name = self.current_token.value
+        self.advance()
+        operator = self.current_token.value
+        self.advance()
+        value = self.parse_expression()
+        # desugar: x+=5 -> x = x + 5
+        op = operator[0]
+        return VarDeclaration(name, BinaryExpression(Identifier(name), op, value), False)
+    
     def parse_comparison(self):
         """Parse comparison expressions like equal to, less than, and greater than."""
         left = self.parse_additive()
@@ -274,6 +297,10 @@ class Parser:
 
     def parse_unary(self):
         """Parse one-value operators like a leading minus sign."""
+        if self.current_token is not None and self.current_token.type == TokenType.NOT:
+            self.advance()
+            operand = self.parse_unary()
+            return UnaryExpression("nah", operand)
         if self.current_token is not None and self.current_token.type == TokenType.MINUS:
             self.advance()
             operand = self.parse_unary()
@@ -330,26 +357,25 @@ class Parser:
         return WhileStatement(condition, body)
 
     def parse_for_statement(self):
-        """Parse a for loop with its start, test, update, and body sections."""
         self.advance()  # skip 'spin'
         self.advance()  # skip '('
-
         init = self.parse_var_declaration()
         if self.current_token.type == TokenType.SEMI_COLON:
-            self.advance()                         # skip ';'
+            self.advance()
         else:
             raise Exception(f"Line {self.current_token.line}: You missed a colon")
-        condition = self.parse_expression()    # e.g. i < 10
+        condition = self.parse_expression()
         if self.current_token.type == TokenType.SEMI_COLON:
-            self.advance()                         # skip ';'
+            self.advance()
         else:
             raise Exception(f"Line {self.current_token.line}: You missed a colon")
-        update = self.parse_assignment()       # e.g. i = i + 1
-
+        if self.peek() is not None and self.peek().type in (TokenType.ADD_ASSIGN, TokenType.SUB_ASSIGN, TokenType.MUL_ASSIGN, TokenType.DIV_ASSIGN):
+            update = self.parse_compound_assignment()
+        else:
+            update = self.parse_assignment()
         self.advance()  # skip ')'
         self.advance()  # skip '{'
         body = self.parse_block()
-
         return ForStatement(init, condition, update, body)
 
     def parse_return_statement(self):

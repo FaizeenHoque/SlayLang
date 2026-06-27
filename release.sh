@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-# sanity checks
 if ! command -v vsce &> /dev/null; then
     echo "✗ vsce not found. Run: npm install -g @vscode/vsce"
     exit 1
@@ -9,8 +8,12 @@ fi
 
 read -p "change version to: " VERSION
 read -p "commit message (default: release v$VERSION): " COMMIT_MESSAGE
+read -p "changelog entry (what changed in this version): " CHANGELOG_ENTRY
 
 COMMIT_MESSAGE=${COMMIT_MESSAGE:-"release v$VERSION"}
+DATE=$(date +%Y-%m-%d)
+ENTRY="## v$VERSION — $DATE\n\n$CHANGELOG_ENTRY\n\n"
+echo -e "$ENTRY$(cat CHANGELOG.md 2>/dev/null)" > CHANGELOG.md
 
 echo "→ updating versions..."
 sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" npm/package.json

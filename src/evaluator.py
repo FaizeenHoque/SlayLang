@@ -31,7 +31,10 @@ class Evaluator:
             "rant":   lambda args: print(*args, "!!"),
             "snoop": lambda args: input(args[0] if args else ""),
             "floatify": lambda args: float(args[0]),
-            "intify": lambda args: int(args[0])
+            "intify": lambda args: int(args[0]),
+            "len": lambda args: len(args[0]),
+            "push": lambda args: args[0].append(args[1]),
+            "pop": lambda args: args[0].pop(),
         }        
 
     def evaluate(self, node):
@@ -134,6 +137,10 @@ class Evaluator:
                 return left >= right
             elif node.operator == "<=":
                 return left <= right
+            elif node.operator == "&&":
+                return left and right
+            elif node.operator == "||":
+                return left or right
 
         elif isinstance(node, CallExpression):
             if node.name in self.builtins:
@@ -200,3 +207,6 @@ class Evaluator:
             for idx in node.indexes[:-1]:
                 arr = arr[self.evaluate(idx)]
             arr[self.evaluate(node.indexes[-1])] = self.evaluate(node.value)
+        
+        elif isinstance(node, UnaryExpression):
+            return not self.evaluate(node.operand)

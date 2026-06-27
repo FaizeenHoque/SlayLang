@@ -53,6 +53,11 @@ class TokenType(Enum):
     MODULO      = "MODULO"
     POWER       = "POWER"
 
+    # List operations
+    LEN         = "LEN"
+    PUSH        = "PUSH"
+    POP         = "POP"
+
     # Comparison operators
     EQUAL       = "EQUAL"
     NOT_EQUAL   = "NOT_EQUAL"
@@ -93,7 +98,7 @@ class TokenType(Enum):
     CATCH       = "CATCH"
     THROW       = "THROW"
 
-INBUILT_FUNCTIONS = {TokenType.PRINT, TokenType.PRINT_LOUD, TokenType.INPUT, TokenType.INTIFY, TokenType.FLOATIFY}
+INBUILT_FUNCTIONS = {TokenType.PRINT, TokenType.PRINT_LOUD, TokenType.INPUT, TokenType.INTIFY, TokenType.FLOATIFY, TokenType.LEN, TokenType.PUSH, TokenType.POP}
 
 BOOLEANS = {TokenType.TRUE, TokenType.FALSE}
 
@@ -132,7 +137,10 @@ BUILTINS = {
     "rant":  TokenType.PRINT_LOUD,
     "snoop": TokenType.INPUT,
     "floatify": TokenType.FLOATIFY,
-    "intify": TokenType.INTIFY
+    "intify": TokenType.INTIFY,
+    "len": TokenType.LEN,
+    "push": TokenType.PUSH,
+    "pop": TokenType.POP
 }
 
 OPERATORS = {

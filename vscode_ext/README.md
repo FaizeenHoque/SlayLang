@@ -10,7 +10,7 @@
 Most languages throw `NullPointerException`. SlayLang throws shade.
 
 ```
-spin (vibe x = 10; x >= 0; x = x - 1) {
+spin (vibe x = 10; x >= 0; x -= 1) {
     yap("nonsense")
 }
 ```
@@ -82,17 +82,17 @@ You will be informed. You will be slightly judged. You will fix your code.
 ### Variables
 
 ```
-vibe x = 10          # mutable variable
-lockedin y = 42      # constant — don't even try to reassign it
+vibe x = 10            # mutable variable
+lockedin y = 42        # constant — don't even try to reassign it
 vibe name = "slay"
-vibe nothing = ghosted   # null
+vibe nothing = ghosted # null
 ```
 
 | SlayLang | Meaning |
 |---|---|
 | `vibe` | mutable variable (`let`) |
 | `lockedin` | constant (`const`) |
-| `ghosted` | null |
+| `ghosted` | null / None |
 
 ---
 
@@ -114,6 +114,8 @@ vibe isCap = cap       # false
 
 ```
 yap("hello world")      # prints: hello world
+yap(nocap)              # prints: nocap
+yap(ghosted)            # prints: ghosted
 rant("hello world")     # prints: hello world !!
 ```
 
@@ -128,13 +130,15 @@ rant("hello world")     # prints: hello world !!
 
 ```
 vibe name = snoop("what's your name? ")
-vibe age = numify(snoop("how old are you? "))
+vibe age = intify(snoop("how old are you? "))
+vibe price = floatify(snoop("enter price: "))
 ```
 
 | SlayLang | Meaning |
 |---|---|
 | `snoop(prompt)` | read input from stdin |
-| `numify(value)` | convert string to number |
+| `intify(value)` | convert to integer |
+| `floatify(value)` | convert to float |
 
 ---
 
@@ -143,15 +147,34 @@ vibe age = numify(snoop("how old are you? "))
 ```
 vibe a = 2 ** 8      # power → 256
 vibe b = 10 % 3      # modulo → 1
-vibe c = a + b       # → 257
+vibe c = 17 \ 5      # floor divide → 3
+vibe d = a + b       # → 257
 ```
+
+Operator precedence follows PEMDAS — `**` before `* / % \` before `+ -` before comparisons before `&& ||`.
 
 | SlayLang | Meaning |
 |---|---|
 | `+` `-` `*` `/` | standard arithmetic |
 | `**` | power / exponent |
 | `%` | modulo |
+| `\` | floor divide |
 | `==` `!=` `>` `<` `>=` `<=` | comparison |
+| `&&` | logical and |
+| `\|\|` | logical or |
+| `nah` | logical not |
+
+---
+
+### Compound assignment
+
+```
+vibe x = 10
+x += 5    # x is now 15
+x -= 3    # x is now 12
+x *= 2    # x is now 24
+x /= 4    # x is now 6
+```
 
 ---
 
@@ -181,11 +204,11 @@ sus (x > 10) {
 # while loop
 grind (x > 0) {
     yap(x)
-    x = x - 1
+    x -= 1
 }
 
 # for loop
-spin (vibe i = 0; i <= 10; i = i + 1) {
+spin (vibe i = 0; i <= 10; i += 1) {
     sus (i == 5) { skip }   # continue
     sus (i == 8) { dip }    # break
     yap(i)
@@ -211,12 +234,52 @@ cook greet(name) {
 yap(greet("world"))
 ```
 
+```
+cook factorial(n) {
+    sus (n <= 1) {
+        yeet 1
+    }
+    yeet n * factorial(n - 1)
+}
+
+yap(factorial(10))
+```
+
 | SlayLang | Meaning |
 |---|---|
 | `cook` | define a function |
 | `yeet` | return a value |
 
-> Functions only have access to their own parameters — they don't see outer variables. Pass everything in as arguments.
+---
+
+### Arrays
+
+```
+vibe nums[] = [1, 2, 3, 4, 5]
+
+yap(nums[0])       # 1
+nums[0] = 99       # mutation
+yap(nums[0])       # 99
+
+# nested arrays
+vibe matrix[] = [[1, 2], [3, 4]]
+yap(matrix[0][1])  # 2
+matrix[1][0] = 99
+```
+
+```
+vibe arr[] = []
+push(arr, 10)      # append
+push(arr, 20)
+pop(arr)           # remove last
+yap(len(arr))      # 1
+```
+
+| SlayLang | Meaning |
+|---|---|
+| `push(arr, val)` | append to array |
+| `pop(arr)` | remove last element |
+| `len(arr)` | length of array |
 
 ---
 
@@ -224,7 +287,7 @@ yap(greet("world"))
 
 ```
 cook fizzbuzz(n) {
-    spin (vibe i = 1; i <= n; i = i + 1) {
+    spin (vibe i = 1; i <= n; i += 1) {
         sus (i % 15 == 0) {
             yap("FizzBuzz")
         } mid (i % 3 == 0) {
@@ -244,7 +307,7 @@ fizzbuzz(20)
 
 ## Editor support
 
-Run `slay setup` after installing to automatically install the **SlayLang VS Code extension** — syntax highlighting for `.slay` files out of the box
+Run `slay setup` after installing to automatically install the **SlayLang VS Code extension** — syntax highlighting for `.slay` files out of the box.
 
 ---
 
