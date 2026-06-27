@@ -42,7 +42,7 @@ class Parser:
         while True:
             if self.current_token is None:
                 raise Exception(
-                    f"Line {self.current_token.line}: ran clean off the end of the token list without ever "
+                    "ran clean off the end of the token list without ever"
                     "hitting EOF — that's a lexer bug, not a you-wrote-bad-code problem"
                 )
             if self.current_token.type == TokenType.EOF:
@@ -76,9 +76,9 @@ class Parser:
         elif self.current_token.type in INBUILT_FUNCTIONS:
             return self.parse_expression()
         elif self.current_token.type == TokenType.IDENT:
-            if self.peek().type == TokenType.ASSIGN:
+            if self.peek() is not None and self.peek().type == TokenType.ASSIGN:
                 return self.parse_assignment()
-            elif self.peek().type == TokenType.LBRACKET:
+            elif self.peek() is not None and self.peek().type == TokenType.LBRACKET:
                 return self.parse_index_assignment()
             else:
                 return self.parse_expression()
@@ -218,7 +218,7 @@ class Parser:
 
         if self.current_token is None:
             raise Exception(
-                f"Line {self.current_token.line}: opened '(' at token #{open_index} and never found the matching "
+                f"opened '(' at token #{open_index} and never found the matching "
                 f"')' — i ran straight off the end of the file looking for it"
             )
 
@@ -291,7 +291,7 @@ class Parser:
 
         if self.current_token is None:
             raise Exception(
-                "Line {self.current_token.line}: you opened a block with '{' and never closed it — i hit the "
+                "you opened a block with '{' and never closed it — i hit the "
                 "end of the file still waiting for a '}'"
             )
 

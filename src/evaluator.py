@@ -198,5 +198,5 @@ class Evaluator:
         elif isinstance(node, IndexAssignment):
             arr = self.env[node.name]["value"]
             for idx in node.indexes[:-1]:
-                arr == arr[self.evaluate(idx)]
+                arr = arr[self.evaluate(idx)]
             arr[self.evaluate(node.indexes[-1])] = self.evaluate(node.value)
