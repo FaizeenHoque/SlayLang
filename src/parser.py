@@ -82,11 +82,11 @@ class Parser:
             )
 
     def parse_primary(self):
-        if self.current_token.type == TokenType.MINUS:
-            self.advance()
-            operand = self.parse_primary()
-            return BinaryExpression(NumberLiteral(0), "-", operand)
-        elif self.current_token.type == TokenType.NUMBER:
+        # if self.current_token.type == TokenType.MINUS:
+        #     self.advance()
+        #     operand = self.parse_primary()
+        #     return BinaryExpression(NumberLiteral(0), "-", operand)
+        if self.current_token.type == TokenType.NUMBER:
             node = NumberLiteral(self.current_token.value)
             self.advance()
             return node
@@ -212,15 +212,53 @@ class Parser:
         return args
 
     def parse_expression(self):
-        left = self.parse_primary()
+        return self.parse_comparison()
 
-        while self.current_token is not None and self.current_token.type in BINARY_OPERATORS:
+    def parse_comparison(self):
+        left = self.parse_additive()
+        while self.current_token is not None and self.current_token.type in (
+            TokenType.EQUAL, TokenType.NOT_EQUAL,
+            TokenType.GT, TokenType.LT, TokenType.GT_EQUAL, TokenType.LT_EQUAL
+        ):
             operator = self.current_token.value
             self.advance()
-            right = self.parse_primary()
+            right = self.parse_additive()
             left = BinaryExpression(left, operator, right)
-
         return left
+
+    def parse_additive(self):
+        left = self.parse_term()
+        while self.current_token is not None and self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
+            operator = self.current_token.value
+            self.advance()
+            right = self.parse_term()
+            left = BinaryExpression(left, operator, right)
+        return left
+
+    def parse_term(self):
+        left = self.parse_power()
+        while self.current_token is not None and self.current_token.type in (TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.MODULO, TokenType.FLOOR_DIVIDE):
+            operator = self.current_token.value
+            self.advance()
+            right = self.parse_power()
+            left = BinaryExpression(left, operator, right)
+        return left
+
+    def parse_power(self):
+        left = self.parse_unary()
+        if self.current_token is not None and self.current_token.type == TokenType.POWER:
+            operator = self.current_token.value
+            self.advance()
+            right = self.parse_power()  # right-associative: 2**3**2 = 2**9
+            return BinaryExpression(left, operator, right)
+        return left
+
+    def parse_unary(self):
+        if self.current_token is not None and self.current_token.type == TokenType.MINUS:
+            self.advance()
+            operand = self.parse_unary()
+            return BinaryExpression(NumberLiteral(0), "-", operand)
+        return self.parse_primary()
 
     def parse_block(self):
         statements = []
@@ -272,16 +310,16 @@ class Parser:
         self.advance()  # skip 'spin'
         self.advance()  # skip '('
 
-        init = self.parse_var_declaration()    # e.g. vibe i = 0
+        init = self.parse_var_declaration()
         if self.current_token.type == TokenType.SEMI_COLON:
             self.advance()                         # skip ';'
         else:
-            raise Exception("Line {self.current_token.line}: You missed a colon")
+            raise Exception(f"Line {self.current_token.line}: You missed a colon")
         condition = self.parse_expression()    # e.g. i < 10
         if self.current_token.type == TokenType.SEMI_COLON:
             self.advance()                         # skip ';'
         else:
-            raise Exception("Line {self.current_token.line}: You missed a colon")
+            raise Exception(f"Line {self.current_token.line}: You missed a colon")
         update = self.parse_assignment()       # e.g. i = i + 1
 
         self.advance()  # skip ')'

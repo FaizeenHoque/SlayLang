@@ -3,7 +3,7 @@ vibe numbers[] = [5,10,15,20,25]
 cook average(arr) {
     vibe total = 0
 
-    spin(vibe i = 0; i < 5; i = i + 1) {
+    spin (vibe i = 0; i < 5; i = i + 1) {
         total = total + arr[i]
     }
 
@@ -22,14 +22,7 @@ cook grade(score) {
     }
 }
 
-vibe avg = average(numbers)
-
-yap("Average:")
-yap(avg)
-
-yap("Grade:")
-yap(grade(avg))
-
-spin(vibe i = 0; i < 5; i = i + 1) {
-    yap(numbers[i])
-}
+yap(grade(95))
+yap(grade(85))
+yap(grade(75))
+yap(grade(65))
