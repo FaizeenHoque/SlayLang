@@ -1,4 +1,9 @@
-# evaluator.py
+"""Walk the syntax tree and run SlayLang code.
+
+The evaluator is the part that gives the program life. It reads the parsed
+nodes, keeps track of variables, handles functions, and performs each action in
+order.
+"""
 
 from nodes import *
 from tokens import *
@@ -6,16 +11,20 @@ from tokens import *
 
 class ReturnException(Exception):
     def __init__(self, value):
+        """Keep the value that should travel back out of a function call."""
         self.value = value
 
 class BreakException(Exception):
+    """Tell the evaluator to stop the current loop right away."""
     pass
 
 class ContinueException(Exception):
+    """Tell the evaluator to skip the rest of the current loop round."""
     pass
 
 class Evaluator:
     def __init__(self):
+        """Create a fresh evaluator with an empty variable store and built-in helpers."""
         self.env = {}
         self.builtins = {
             "yap": lambda args: print(*["ghosted" if a is None else a for a in args]),
@@ -26,6 +35,7 @@ class Evaluator:
         }        
 
     def evaluate(self, node):
+        """Read one syntax tree node and perform the action it represents."""
         if isinstance(node, Program):
             for statement in node.statements:
                 self.evaluate(statement)

@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
+"""Run SlayLang from the command line by wiring the lexer, parser, and evaluator together.
+
+This script checks the file path, loads the source code, and then passes it
+through the lexer, parser, and evaluator so a SlayLang file can be executed
+from the terminal.
+"""
+
 import sys
 import os
+
 from lexer import Lexer
 from parser import Parser
 from evaluator import Evaluator

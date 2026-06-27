@@ -1,10 +1,15 @@
-# parser.py
+"""Turn tokens into an abstract syntax tree for SlayLang.
+
+The parser takes the token stream from the lexer and groups it into statements,
+expressions, and blocks that the evaluator can later run.
+"""
 
 from nodes import *
 from tokens import *
 
 class Parser:
     def __init__(self, tokens):
+        """Store the token list and prepare to read it from the first token."""
         self.tokens = tokens
 
         if self.tokens == []:
@@ -17,6 +22,7 @@ class Parser:
         self.current_token = self.tokens[self.index]
 
     def advance(self):
+        """Move one step forward through the token list."""
         self.index += 1
         if self.index >= len(self.tokens):
             self.current_token = None
@@ -24,11 +30,13 @@ class Parser:
             self.current_token = self.tokens[self.index]
 
     def peek(self):
+        """Look ahead at the next token without consuming it."""
         if self.index + 1 >= len(self.tokens):
             return None
         return self.tokens[self.index + 1]
 
     def parse(self):
+        """Read every top-level statement and wrap them in one program node."""
         statements = []
 
         while True:
@@ -48,6 +56,7 @@ class Parser:
         return Program(statements)
 
     def parse_statement(self):
+        """Decide what kind of statement comes next and parse it."""
         if self.current_token.type in (TokenType.LET, TokenType.CONST):
             return self.parse_var_declaration()
         elif self.current_token.type == TokenType.IF:
@@ -82,6 +91,7 @@ class Parser:
             )
 
     def parse_primary(self):
+        """Parse the smallest building blocks of an expression."""
         # if self.current_token.type == TokenType.MINUS:
         #     self.advance()
         #     operand = self.parse_primary()
@@ -161,6 +171,7 @@ class Parser:
             )
 
     def parse_var_declaration(self):
+        """Read a variable or constant declaration and its starting value."""
         constant = self.current_token.type == TokenType.CONST
         self.advance()
         name = self.current_token.value
@@ -173,6 +184,7 @@ class Parser:
         return VarDeclaration(name, value, constant)
 
     def parse_assignment(self):
+        """Read a normal assignment that changes an existing name."""
         name = self.current_token.value
         self.advance()  # skip identifier
         self.advance()  # skip '='
@@ -180,6 +192,7 @@ class Parser:
         return VarDeclaration(name, value, False)
 
     def parse_index_assignment(self):
+        """Read an assignment that writes into one or more array positions."""
         name = self.current_token.value
         self.advance()
         
@@ -194,6 +207,7 @@ class Parser:
         return IndexAssignment(name, indexes, value)
 
     def parse_call_args(self):
+        """Read the values inside a function call's parentheses."""
         open_index = self.index
         self.advance()  # consume '('
         args = []
@@ -212,9 +226,11 @@ class Parser:
         return args
 
     def parse_expression(self):
+        """Parse a complete expression, starting with comparison level rules."""
         return self.parse_comparison()
 
     def parse_comparison(self):
+        """Parse comparison expressions like equal to, less than, and greater than."""
         left = self.parse_additive()
         while self.current_token is not None and self.current_token.type in (
             TokenType.EQUAL, TokenType.NOT_EQUAL,
@@ -227,6 +243,7 @@ class Parser:
         return left
 
     def parse_additive(self):
+        """Parse expressions that use plus or minus."""
         left = self.parse_term()
         while self.current_token is not None and self.current_token.type in (TokenType.PLUS, TokenType.MINUS):
             operator = self.current_token.value
@@ -236,6 +253,7 @@ class Parser:
         return left
 
     def parse_term(self):
+        """Parse expressions that use multiply, divide, modulo, or floor divide."""
         left = self.parse_power()
         while self.current_token is not None and self.current_token.type in (TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.MODULO, TokenType.FLOOR_DIVIDE):
             operator = self.current_token.value
@@ -245,6 +263,7 @@ class Parser:
         return left
 
     def parse_power(self):
+        """Parse power expressions that use the double-star operator."""
         left = self.parse_unary()
         if self.current_token is not None and self.current_token.type == TokenType.POWER:
             operator = self.current_token.value
@@ -254,6 +273,7 @@ class Parser:
         return left
 
     def parse_unary(self):
+        """Parse one-value operators like a leading minus sign."""
         if self.current_token is not None and self.current_token.type == TokenType.MINUS:
             self.advance()
             operand = self.parse_unary()
@@ -261,6 +281,7 @@ class Parser:
         return self.parse_primary()
 
     def parse_block(self):
+        """Read every statement inside one pair of braces."""
         statements = []
         while self.current_token is not None and self.current_token.type != TokenType.RBRACE:
             if self.current_token.type == TokenType.NEWLINE:
@@ -278,6 +299,7 @@ class Parser:
         return statements
 
     def parse_if_statement(self):
+        """Parse a full if statement, including any else-if or else part."""
         self.advance()  # skip 'sus'
         self.advance()  # skip '('
         condition = self.parse_expression()
@@ -297,6 +319,7 @@ class Parser:
         return IfStatement(condition, body, else_body)
 
     def parse_while_statement(self):
+        """Parse a while loop with its condition and body."""
         self.advance()  # skip 'grind'
         self.advance()  # skip '('
         condition = self.parse_expression()
@@ -307,6 +330,7 @@ class Parser:
         return WhileStatement(condition, body)
 
     def parse_for_statement(self):
+        """Parse a for loop with its start, test, update, and body sections."""
         self.advance()  # skip 'spin'
         self.advance()  # skip '('
 
@@ -329,18 +353,22 @@ class Parser:
         return ForStatement(init, condition, update, body)
 
     def parse_return_statement(self):
+        """Parse a return statement and the value it sends back."""
         self.advance()  # skip 'yeet'
         return ReturnStatement(self.parse_expression())
 
     def parse_break_statement(self):
+        """Parse a break statement that stops the current loop."""
         self.advance()  # skip 'dip'
         return BreakStatement()
     
     def parse_continue_statement(self):
+        """Parse a continue statement that jumps to the next loop round."""
         self.advance() # skip 'skip'
         return ContinueStatement()
 
     def parse_function_declaration(self):
+        """Parse a function name, its parameter list, and its body."""
         self.advance()  # skip 'cook'
         name = self.current_token.value
         self.advance()  # skip function name
@@ -361,6 +389,7 @@ class Parser:
 
 
 if __name__ == "__main__":
+    """Show a tiny parser demo when the file is run by itself."""
     from lexer import Lexer
 
     lexer = Lexer('cook greet(name, age) {\nyap(name)\n}')

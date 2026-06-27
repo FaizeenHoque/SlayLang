@@ -1,7 +1,15 @@
+"""Define the token names and shared token groups used by the SlayLang lexer and parser.
+
+This file acts like the language's symbol list. It gives names to every kind of
+word, number, operator, and punctuation mark that the lexer can produce and the
+parser can understand.
+"""
+
 from enum import Enum
 
 
 class TokenType(Enum):
+    """Name every kind of token that SlayLang knows how to read."""
 
     # Control flow
     IF          = "IF"

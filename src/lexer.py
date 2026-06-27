@@ -1,20 +1,28 @@
-# lexer.py
+"""Turn raw SlayLang source code into tokens.
+
+The lexer reads characters one by one, groups them into useful pieces, and
+hands those pieces to the parser. It is the first step in understanding a
+SlayLang program.
+"""
 
 from tokens import *
 
 
 class Token():
     def __init__(self, type: str, value: any, line: int = 0):
+        """Store the token kind, its text or value, and the line where it was found."""
         self.type = type
         self.value = value
         self.line = line
 
     def __repr__(self):
+        """Show the token in a readable debug form."""
         return f"{self.__class__.__name__}({self.type}, {self.value!r})"
 
 
 class Lexer:
     def __init__(self, source: str):
+        """Store the source text and prepare to scan it from the beginning."""
         self.source = source
 
         if self.source == '':
@@ -25,6 +33,7 @@ class Lexer:
         self.current_character = self.source[self.index]
 
     def advance(self):
+        """Step forward by one character in the source text."""
         self.index += 1
         if self.index >= len(self.source):
             self.current_character = None
@@ -32,6 +41,7 @@ class Lexer:
             self.current_character = self.source[self.index]
 
     def tokenize(self):
+        """Read the whole source text and return every token in order."""
         tokens = []
 
         while self.current_character is not None:
@@ -74,6 +84,7 @@ class Lexer:
         return tokens
 
     def read_string(self, opening_quote):
+        """Read the text inside matching quote marks and return it as one string token."""
         output = ""
 
         while self.current_character != opening_quote:
@@ -87,6 +98,7 @@ class Lexer:
         return Token(TokenType.STRING, output, self.line)
 
     def read_number(self):
+        """Read digits, plus one optional decimal point, and return a number token."""
         number_value = ""
         dot_count = 0
 
@@ -111,6 +123,7 @@ class Lexer:
             return Token(TokenType.NUMBER, int(number_value), self.line)
 
     def read_word(self):
+        """Read a name-like word and decide what kind of token it should become."""
         word_value = ""
 
         while self.current_character is not None and (
@@ -131,6 +144,7 @@ class Lexer:
         return Token(token_type, word_value, self.line)
 
     def skip_comment(self):
+        """Skip the rest of a line comment that starts with double slashes."""
         self.advance()  # consume first '/'
 
         if self.current_character == "/":
@@ -144,6 +158,7 @@ class Lexer:
                 self.advance()  # consume the newline
 
     def read_operator(self):
+        """Read one operator token, including two-character operators when needed."""
         current = self.current_character
         next_char = self.peek()
 
@@ -161,12 +176,14 @@ class Lexer:
         raise Exception(f"dawg.. what operator is {current}??")
 
     def peek(self):
+        """Look at the next character without changing the current position."""
         if self.index + 1 >= len(self.source):
             return None
         return self.source[self.index + 1]
 
 
 if __name__ == "__main__":
+    """Show a tiny lexer demo when the file is run by itself."""
     lexer = Lexer("vibe x = 123 + 45.6 // comment\nyap(x)")
     tokens = lexer.tokenize()
     print(tokens)

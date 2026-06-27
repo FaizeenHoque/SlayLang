@@ -1,3 +1,9 @@
+"""Simple entry point that loads and runs the sample SlayLang file.
+
+This file is a tiny helper for trying the language from inside the source tree.
+It reads the example program, parses it, and then runs it.
+"""
+
 from lexer import Lexer
 from parser import Parser
 from evaluator import Evaluator
