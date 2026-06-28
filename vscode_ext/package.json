@@ -4,7 +4,7 @@
     "displayName": "SlayLang",
     "publisher": "fynr1x",
     "icon": "slay-icon.png",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "engines": { "vscode": "^1.60.0" },
     "activationEvents": ["onLanguage:slay"],
     "repository": {

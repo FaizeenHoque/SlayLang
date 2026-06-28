@@ -1,3 +1,7 @@
+## v0.3.2 — 2026-06-28
+
+Remove AI banner and center alignment from README files
+
 ## v0.3.1 — 2026-06-28
 
 Remove outdated v0.3.0 placeholder and clean up changelog formatting, update readme
