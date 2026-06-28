@@ -1,3 +1,11 @@
+## v0.3.1 — 2026-06-28
+
+Remove outdated v0.3.0 placeholder and clean up changelog formatting, update readme
+
+## v0.3.1 — 2026-06-28
+
+Remove outdated v0.3.0 placeholder and clean up changelog formatting, update readme
+
 # Changelog
 
 ## v0.3.0 — 2025
