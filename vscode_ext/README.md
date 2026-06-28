@@ -1,6 +1,4 @@
-<img width="1774" height="887" alt="ChatGPT Image Jun 28, 2026, 07_14_03 PM" src="https://github.com/user-attachments/assets/acc18db0-eaf5-4355-a14a-aab08d69c8ed" />
-(i know, the banner is clearly ai)
-<p align="center">
+# SlayLang
 
 **The programming language with attitude.**
 
@@ -9,7 +7,6 @@
 [![license](https://img.shields.io/npm/l/slaylang.svg)](https://github.com/FaizeenHoque/SlayLang/blob/main/LICENSE)
 [![made with chaos](https://img.shields.io/badge/made%20with-chaos-ff69b4)](https://github.com/FaizeenHoque/SlayLang)
 
-</p>
 
 Most languages throw `NullPointerException`. SlayLang throws shade.
 
