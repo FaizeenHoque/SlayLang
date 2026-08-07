@@ -1,5 +1,3 @@
-<img width="1774" height="887" alt="ChatGPT Image Jun 28, 2026, 07_14_03 PM" src="https://github.com/user-attachments/assets/acc18db0-eaf5-4355-a14a-aab08d69c8ed" />
-(i know, the banner is clearly ai)
 <p align="center">
 
 **The programming language with attitude.**
@@ -11,15 +9,11 @@
 
 </p>
 
-Most languages throw `NullPointerException`. SlayLang throws shade.
-
 ```
 spin (vibe x = 10; x >= 0; x -= 1) {
     yap("nonsense")
 }
 ```
-
-That's a `for` loop. It counts down, prints `"nonsense"` eleven times, and does it *with style*.
 
 ---
 
@@ -32,30 +26,20 @@ npm install -g slaylang
 slay setup
 ```
 
-`slay setup` drops the **VS Code extension** in automatically — syntax highlighting included, no extra clicks.
-
 ### Linux (Arch/Manjaro/etc.)
-
-If you installed Node via pacman, set a user npm prefix first to avoid needing sudo:
 
 ```bash
 mkdir -p ~/.npm-global
 npm config set prefix ~/.npm-global
 ```
 
-Add to your shell config:
-
 ```bash
-# bash/zsh — add to ~/.bashrc or ~/.zshrc
 export PATH="$HOME/.npm-global/bin:$PATH"
 ```
 
 ```fish
-# fish — add to ~/.config/fish/config.fish
 fish_add_path ~/.npm-global/bin
 ```
-
-Restart your terminal, then run the quick install above.
 
 ### Run it
 
@@ -65,19 +49,11 @@ slay program.slay
 
 ---
 
-## Why SlayLang exists
-
-Nobody asked for this. That's exactly why it had to be built.
-
-- 🔥 **Readable-ish syntax.** `vibe` instead of `let`. `yap` instead of `print`. You'll get used to it, or you won't, and that's also valid.
-- ⚙️ **A real lexer, parser, and evaluator under the hood** — not a regex hack pretending to be a compiler.
-- 🪞 **Error messages with personality.** SlayLang doesn't fail quietly:
+## Why this exists
 
 ```
 Exception: buddy, variable x does NOT exist
 ```
-
-You will be informed. You will be slightly judged. You will fix your code.
 
 ---
 
@@ -87,7 +63,7 @@ You will be informed. You will be slightly judged. You will fix your code.
 
 ```
 vibe x = 10            # mutable variable
-lockedin y = 42        # constant — don't even try to reassign it
+lockedin y = 42        # constant, don't even try to reassign it
 vibe name = "slay"
 vibe nothing = ghosted # null
 ```
@@ -154,8 +130,6 @@ vibe b = 10 % 3      # modulo → 1
 vibe c = 17 \ 5      # floor divide → 3
 vibe d = a + b       # → 257
 ```
-
-Operator precedence follows PEMDAS — `**` before `* / % \` before `+ -` before comparisons before `&& ||`.
 
 | SlayLang | Meaning |
 |---|---|
@@ -311,20 +285,20 @@ fizzbuzz(20)
 
 ## Editor support
 
-Run `slay setup` after installing to automatically install the **SlayLang VS Code extension** — syntax highlighting for `.slay` files out of the box.
+`slay setup` grabs the VS Code extension automatically. No marketplace digging.
 
 ---
 
 ## Contributing
 
-Found a bug? Hit an infinite loop? Made the fan spin up? [Open an issue](https://github.com/FaizeenHoque/SlayLang/issues) or send a PR. Read the code first — it's a real parser/lexer/evaluator, treat it like one.
+Bug, infinite loop, fan taking off. Open an issue or send a PR. Real parser/lexer/evaluator, not a toy. Read the code first.
 
 ---
 
 ## License
 
-MIT. Use it, fork it, roast it. Just don't pretend you wrote it.
+MIT. Use it, fork it, break it. Just credit it.
 
 ---
 
-<sub>Built by [Faizeen Hoque](https://github.com/FaizeenHoque). SlayLang has strong opinions about your variable names.</sub>
+<sub>Built by [Faizeen Hoque](https://github.com/FaizeenHoque).</sub>
