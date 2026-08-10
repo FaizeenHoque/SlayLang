@@ -1,4 +1,5 @@
 <p align="center">
+<img width="753" height="408" alt="image" src="https://github.com/user-attachments/assets/752f8da2-1464-4115-9d1b-601d38206f4a" />
 
 **The programming language with attitude.**
 
